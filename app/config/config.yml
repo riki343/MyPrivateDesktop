@@ -1,0 +1,16 @@
+imports:
+    - { resource: parameters.yml }
+    - { resource: security.yml }
+    - { resource: services.yml }
+    - { resource: fos_user.yml }
+    - { resource: assets.yml }
+    - { resource: framework.yml }
+    - { resource: assetic.yml }
+    - { resource: clank.yml }
+    - { resource: twig.yml }
+    - { resource: doctrine.yml }
+    - { resource: swiftmailer.yml }
+    - { resource: knp_paginator.yml }
+
+parameters:
+    locale: en

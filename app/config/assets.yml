@@ -1,0 +1,15 @@
+assetic:
+    assets:
+        css:
+            inputs:
+                - 'vendor/Bootstrap/css/bootstrap.min.css'
+        vendors:
+            inputs:
+                - 'vendor/jQuery/jquery-2.1.4.min.js'
+                - 'vendor/Moment/moment.min.js'
+                - 'vendor/Wow/wow.min.js'
+                - 'vendor/Bootstrap/js/bootstrap.min.js'
+                - 'vendor/Angular/angular.min.js'
+                - 'vendor/Angular/angular-animate.min.js'
+                - 'vendor/Angular/angular-route.min.js'
+                - 'vendor/Angular/angular-touch.min.js'

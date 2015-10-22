@@ -1,0 +1,15 @@
+fos_user:
+    resource: "@FOSUserBundle/Resources/config/routing/all.xml"
+
+fos_js_routing:
+    resource: "@FOSJsRoutingBundle/Resources/config/routing/routing.xml"
+
+riki34_frontend:
+    resource: "@riki34FrontendBundle/Controller/"
+    type:     annotation
+    prefix: '/'
+
+riki34_backend:
+    type: annotation
+    resource: "@riki34BackendBundle/Controller/"
+    prefix: '/api'

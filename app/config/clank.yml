@@ -1,0 +1,4 @@
+clank:
+    web_socket_server:
+        port: 8080        #The port the socket server will listen on
+        host: 127.0.0.1   #(optional) The host ip to bind to
