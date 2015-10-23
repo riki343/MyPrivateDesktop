@@ -9,7 +9,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 /**
  * Class DefaultController
  * @package riki34\FrontendBundle\Controller
- * @Route("/")
  */
 class DefaultController extends Controller
 {
@@ -32,7 +31,7 @@ class DefaultController extends Controller
     }
 
     /**
-     * @Route("desktop")
+     * @Route("/desktop")
      * @Method({"GET"})
      */
     public function desktopAction() {

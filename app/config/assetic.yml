@@ -2,6 +2,6 @@
 assetic:
     debug:          "%kernel.debug%"
     use_controller: false
-    bundles:        [ JDareClankBundle ]
+    bundles:        [ JDareClankBundle, riki34FrontendBundle, riki34BackendBundle ]
     filters:
         cssrewrite: ~

@@ -3,13 +3,43 @@ assetic:
         css:
             inputs:
                 - 'vendor/Bootstrap/css/bootstrap.min.css'
+                - 'vendor/Animate/animate.min.css'
+                - 'stylesheets/spinner.css'
+                - 'stylesheets/desktop.css'
         vendors:
             inputs:
+                - 'vendor/yepnope/yepnope-2.0.0.js'
                 - 'vendor/jQuery/jquery-2.1.4.min.js'
                 - 'vendor/Moment/moment.min.js'
                 - 'vendor/Wow/wow.min.js'
                 - 'vendor/Bootstrap/js/bootstrap.min.js'
                 - 'vendor/Angular/angular.min.js'
                 - 'vendor/Angular/angular-animate.min.js'
-                - 'vendor/Angular/angular-route.min.js'
+                - 'vendor/ui-router/angular-ui-router.min.js'
                 - 'vendor/Angular/angular-touch.min.js'
+                - 'vendor/angular-translate/angular-translate.js'
+                - 'vendor/angular-translate/angular-translate-loader-static-files.js'
+                - 'vendor/ui.bootstrap.context-menu/context-menu.js'
+                - 'vendor/angular-sortable-view/angular-sortable-view.min.js'
+                - 'vendor/angular-subapp/tmhSubapp.js'
+        modules:
+            inputs:
+                - 'javascripts/models.js'
+                - 'javascripts/services.js'
+                - 'javascripts/environment.js'
+                - 'javascripts/user.js'
+                - 'javascripts/controllers.js'
+                - 'javascripts/components.js'
+                - 'javascripts/kernel.js'
+        models:
+            inputs:
+                - 'javascripts/Model/*'
+        services:
+            inputs:
+                - 'javascripts/Services/*'
+        controllers:
+            inputs:
+                - 'javascripts/Controller/*'
+        components:
+            inputs:
+                - 'javascripts/Components/*'

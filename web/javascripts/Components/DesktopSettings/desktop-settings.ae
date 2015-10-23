@@ -1,0 +1,33 @@
+{
+  "folder": "DesktopSettings",
+  "module": {
+    "name": "desktop-settings",
+    "file": "desktop-settings.js"
+  },
+
+  "bootstrapView": "desktop-settings.html",
+
+  "systemDependencies": [
+    "kernel"
+  ],
+
+  "dependencies": [],
+
+  "javascript": [
+    {
+      "type": "controller",
+      "name": "desktopSettingsController",
+      "file": "Controllers/desktop-settings.controller.js"
+    }
+  ],
+
+  "resources": [
+
+  ],
+
+  "info": {
+    "author": "",
+    "email": "",
+    "version": ""
+  }
+}
