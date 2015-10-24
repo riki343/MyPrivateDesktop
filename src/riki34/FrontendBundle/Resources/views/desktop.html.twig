@@ -2,6 +2,12 @@
 
 {% block body %}
     <section id="my-private-desktop-app" ng-app="kernel" class="app" ng-controller="applicationController as app">
-        <desktop></desktop>
+        <desktop desktop-id="{{ desktop_id }}"></desktop>
     </section>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" rel="script" language="JavaScript">
+    </script>
+    {{ parent() }}
 {% endblock %}

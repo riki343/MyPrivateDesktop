@@ -11,6 +11,7 @@ imports:
     - { resource: doctrine.yml }
     - { resource: swiftmailer.yml }
     - { resource: knp_paginator.yml }
+    - { resource: stof_doctrine_extenstions.yml }
 
 parameters:
     locale: en

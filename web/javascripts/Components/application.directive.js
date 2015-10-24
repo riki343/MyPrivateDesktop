@@ -13,6 +13,7 @@
                         'ng-mousedown=\"down($event);\">' +
                             '<span class="menu-button" ng-click="closeProcess();"><i class="fa fa-close fa-fw"></i></span>' +
                             '<span class="menu-button" ng-click="toggleFullscreen();"><i class="fa fa-windows fa-fw"></i></span>' +
+                            '<span class="menu-button" ng-click="collapse();"><i class="fa fa-minus fa-fw"></i></span>' +
                     '</p>' +
                 '</div>';
 
@@ -32,7 +33,7 @@
             // Loading package...
             var promise = $http.get($scope.app);
             promise.success(function (response) {
-                $scope.pid = ProcessManager.addProcess(response.module.name);
+                $scope.pid = ProcessManager.addProcess(response.module.name, 'system', $scope.index);
                 if ($scope.pid !== null) {
                     LoadApp(response);
                 }
@@ -91,6 +92,10 @@
                 directive.remove();
             }
 
+            $scope.collapse = function () {
+                $scope.$emit('ApplicationCollapsed', $scope.index = true);
+            };
+
             function decorateApp($element) {
                 $element.css('width', width + 'px');
                 $element.css('height', height + 'px');
@@ -138,6 +143,14 @@
                         directive.css('z-index', 10);
                     }
                 });
+
+                $scope.$watch('collapsed', function (val) {
+                    if (val === true) {
+                        directive.css('display', 'none');
+                    } else {
+                        directive.css('display', 'block');
+                    }
+                });
             });
 
             $scope.down = function (event) {
@@ -175,7 +188,8 @@
             'scope': {
                 'app': '=app',
                 'index': '=index',
-                'selected': '=selected'
+                'selected': '=selected',
+                'collapsed': '=collapsed'
             }
         };
     }

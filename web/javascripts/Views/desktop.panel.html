@@ -1,0 +1,9 @@
+<div ng-style="settings">
+    <div ng-show="menuVisible" class="desktop-panel-menu show-hide-animation"></div>
+    <button ng-click="menuVisible = !menuVisible;" class="desktop-panel-start-button">Start!</button>
+    <ul class="desktop-panel-applications-list">
+        <li ng-repeat="app in apps" class="desktop-panel-applications-list-item">
+            {{ app.name }}
+        </li>
+    </ul>
+</div>

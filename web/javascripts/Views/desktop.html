@@ -1,11 +1,19 @@
 <div ng-style="background.settings" context-menu="background.contextMenu" class="desktop no-select">
+
     <form ng-submit="launch(package);" class="form-horizontal" style="width: 100%;">
         <div class="input-group input-group-sm">
             <label class="input-group-addon" for="app-launcher">Package: </label>
-            <input id="app-launcher" class="form-control" ng-model="package" type="text">
-            <span class="input-group-btn"><button class="btn btn-default btn-sm" type="submit">Launch!</button></span>
+            <select id="app-launcher" class="form-control" ng-model="package">
+                <option value="/javascripts/Components/ProcessManager/process-manager.ae">/javascripts/Components/ProcessManager/process-manager.ae</option>
+                <option value="/javascripts/Components/DesktopSettings/desktop-settings.ae">/javascripts/Components/DesktopSettings/desktop-settings.ae</option>
+            </select>
+            <span class="input-group-btn"><button class="btn btn-default btn-sm" type="submit">
+                <i class="fa fa-laptop"></i>Launch!</button>
+            </span>
         </div>
     </form>
 
-    <application ng-repeat="app in apps track by $index" app="app.src" index="$index" selected="app.selected"></application>
+    <application ng-repeat="app in apps track by $index" app="app.src" index="$index" selected="app.selected" collapsed="app.collapsed"></application>
+
+    <desktop-panel apps="applications"></desktop-panel>
 </div>

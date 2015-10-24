@@ -37,3 +37,105 @@ body {
     filter: alpha(opacity=50);
     opacity: .5;
 }
+
+.desktop-panel-start-button {
+    width: auto;
+    height: 100%;
+    opacity: 0.7;
+    text-align: center;
+    color: whitesmoke;
+    transition: 0.1s linear opacity;
+    background-color: green;
+    border: solid gray 1px;
+    float: left;
+}
+
+.desktop-panel-start-button:hover {
+    opacity: 1.0;
+}
+
+.desktop-panel-menu {
+    position: absolute;
+    z-index: 100;
+    left: 2px;
+    height: 50%;
+    width: 20%;
+    background-color: whitesmoke;
+}
+
+.desktop-panel-tray {
+    width: auto;
+    display: inline-block;
+    float: right;
+}
+
+.desktop-panel-launchers {
+    width: auto;
+    display: inline-block;
+    float: left;
+}
+
+.desktop-panel-applications-list {
+    float: left;
+    height: 100%;
+    padding: 0;
+}
+
+.desktop-panel-applications-list-item {
+    text-align: center;
+    background-color: #3c3c3c;
+    border: solid gray 1px;
+    opacity: 0.7;
+    float: left;
+    display: flex;
+    padding: 4px;
+    color: whitesmoke;
+    cursor: pointer;
+    transition: opacity linear 0.1s;
+}
+
+.desktop-panel-applications-list-item:hover, .desktop-panel-applications-list-item + .active {
+    opacity: 1.0;
+}
+
+/* Desktop cell */
+.desktop-cell {
+    float: left;
+    margin: 0;
+    padding: 3px;
+    box-sizing: border-box;
+    border: solid transparent 1px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background-color: transparent;
+}
+
+.desktop-cell:focus {
+    background-color: rgba(173, 216, 230, 0.71);
+}
+
+.desktop-cell:focus, .desktop-cell:hover {
+    overflow: visible;
+}
+
+
+/* Animations */
+.show-hide-animation {
+    -webkit-transition: opacity linear 0.5s;
+    transition: opacity linear 0.5s;
+    height: auto;
+    opacity: 1.0;
+}
+
+.show-hide-animation.ng-hide {
+    opacity: 0;
+}
+
+.show-hide-animation.ng-show {
+    transition: opacity linear 0.2s;
+}
+
+
+.sf-minitoolbar {
+    display: none !important;
+}

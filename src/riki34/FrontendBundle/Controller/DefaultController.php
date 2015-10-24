@@ -35,6 +35,8 @@ class DefaultController extends Controller
      * @Method({"GET"})
      */
     public function desktopAction() {
-        return $this->render('@riki34Frontend/desktop.html.twig');
+        return $this->render('@riki34Frontend/desktop.html.twig', [
+            'desktop_id' => 1
+        ]);
     }
 }

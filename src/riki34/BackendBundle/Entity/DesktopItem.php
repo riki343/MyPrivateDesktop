@@ -201,4 +201,3 @@ class DesktopItem
         return $this->item;
     }
 }
-
