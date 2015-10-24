@@ -20,7 +20,7 @@ window.yepnope = (function (window, document, undef) {
 
     // Some aliases
     var sTimeout = window.setTimeout;
-    var firstScript;
+    var lastScript;
     var scriptsQueue = [];
     var count = 0;
     var toString = {}.toString;
@@ -45,9 +45,10 @@ window.yepnope = (function (window, document, undef) {
         return 'yn_' + (count++);
     }
 
-    function readFirstScript() {
-        if (!firstScript || !firstScript.parentNode) {
-            firstScript = document.getElementsByTagName('script')[0];
+    function readLastScript() {
+        if (!lastScript || !lastScript.parentNode) {
+            var scripts = document.getElementsByTagName('script');
+            lastScript = scripts[scripts.length - 1];
         }
     }
 
@@ -153,8 +154,8 @@ window.yepnope = (function (window, document, undef) {
         }, timeout);
 
         // Inject script into to document
-        readFirstScript();
-        firstScript.parentNode.insertBefore(script, firstScript);
+        readLastScript();
+        lastScript.parentNode.appendChild(script);
     }
 
     function injectCss(options, cb) {
@@ -197,11 +198,12 @@ window.yepnope = (function (window, document, undef) {
             link.setAttribute(i, attrs[i]);
         }
 
-        readFirstScript();
+        // Inject script into to document
+        readLastScript();
         // We append link tags so the cascades work as expected.
         // A little more dangerous, but if you're injecting CSS
         // dynamically, you probably can handle it.
-        firstScript.parentNode.appendChild(link);
+        lastScript.parentNode.appendChild(link);
 
         // Always just run the callback for CSS on next tick. We're not
         // going to try to normalize this, so don't worry about runwhenready here.
@@ -266,11 +268,9 @@ window.yepnope = (function (window, document, undef) {
                         cb();
                     }
                 });
-            }
-            else if (type === 'css') {
+            } else if (type === 'css') {
                 injectCss(options, cb);
-            }
-            else {
+            } else {
                 throw new Error('Unable to determine filetype.');
             }
         }

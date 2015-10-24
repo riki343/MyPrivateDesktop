@@ -4,6 +4,7 @@ assetic:
             inputs:
                 - 'vendor/Bootstrap/css/bootstrap.min.css'
                 - 'vendor/Animate/animate.min.css'
+                - 'vendor/font-awesome/css/font-awesome.min.css'
                 - 'stylesheets/spinner.css'
                 - 'stylesheets/desktop.css'
         vendors:
@@ -21,7 +22,6 @@ assetic:
                 - 'vendor/angular-translate/angular-translate-loader-static-files.js'
                 - 'vendor/ui.bootstrap.context-menu/context-menu.js'
                 - 'vendor/angular-sortable-view/angular-sortable-view.min.js'
-                - 'vendor/angular-subapp/tmhSubapp.js'
         modules:
             inputs:
                 - 'javascripts/models.js'

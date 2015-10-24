@@ -1,9 +1,7 @@
 {% extends '::base.html.twig' %}
 
 {% block stylesheets %}
-    {% stylesheets
-        '@css'
-    %}
+    {% stylesheets '@css' filter="cssrewrite" output="css/all.css" %}
         <link rel="stylesheet" type="text/css" href="{{ asset_url }}"/>
     {% endstylesheets %}
 {% endblock %}

@@ -1,0 +1,25 @@
+{
+  "folder": "ProcessManager",
+  "module": {
+    "name": "process-manager",
+    "file": "process-manager.js"
+  },
+
+  "dependencies": [],
+
+  "javascript": [
+    {
+      "type": "controller",
+      "name": "processManagerController",
+      "file": "Controllers/process-manager.controller.js"
+    }
+  ],
+
+  "resources": [],
+
+  "info": {
+    "author": "",
+    "email": "",
+    "version": ""
+  }
+}

@@ -8,13 +8,13 @@
     function moduleConfig($stateProvider, $urlRouterProvider) {
         $stateProvider
             .state('home', {
-                'url': '/desktop-settings/home',
+                'url': '/home',
                 'views': {
                     'desktop-settings': { 'templateUrl': '/javascripts/Components/DesktopSettings/Views/index.html' }
                 }
             })
         ;
 
-        $urlRouterProvider.otherwise('/desktop-settings/home');
+        $urlRouterProvider.otherwise('/home');
     }
 })(angular);

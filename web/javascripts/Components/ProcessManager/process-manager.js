@@ -1,6 +1,6 @@
 (function (angular) {
     angular
-        .module('desktop-settings', [ 'kernel', 'ui.router' ])
+        .module('process-manager', [ 'kernel', 'ui.router' ])
         .config(moduleConfig)
     ;
 
@@ -8,13 +8,13 @@
     function moduleConfig($stateProvider, $urlRouterProvider) {
         $stateProvider
             .state('home', {
-                'url': '/desktop-settings/home',
+                'url': '/process-manager/home',
                 'views': {
-                    'desktop-settings': { 'templateUrl': '/javascripts/Components/DesktopSettings/Views/index.html' }
+                    'process-manager': { 'templateUrl': '/javascripts/Components/ProcessManager/Views/index.html' }
                 }
             })
         ;
 
-        $urlRouterProvider.otherwise('/desktop-settings/home');
+        $urlRouterProvider.otherwise('/process-manager/home');
     }
 })(angular);
