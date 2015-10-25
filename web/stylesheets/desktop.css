@@ -108,6 +108,7 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     background-color: transparent;
+    z-index: 5;
 }
 
 .desktop-cell:focus {

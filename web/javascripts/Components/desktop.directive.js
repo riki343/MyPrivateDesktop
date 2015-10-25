@@ -61,11 +61,8 @@
                             var x = width / 30; var y = height / 20;
                             var cells = [];
 
-                            for (var i = 0, offsetx = 0; i < 30; i++, offsetx += x) {
-                                cells[i] = [];
-                                for (var j = 0, offsety = 0; j < 20; j++, offsety += y) {
-                                    cells[i][j] = null;
-                                }
+                            for (var i = 0; i < 600; i++) {
+                                cells[i] = {};
                             }
 
                             $scope.$broadcast('DesktopGridStateChanged');

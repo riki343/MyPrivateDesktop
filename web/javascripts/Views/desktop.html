@@ -13,6 +13,8 @@
         </div>
     </form>
 
+    <desktop-grid grid="desktopGrid"></desktop-grid>
+
     <application ng-repeat="app in apps track by $index" app="app.src" index="$index" selected="app.selected" collapsed="app.collapsed"></application>
 
     <desktop-panel apps="applications"></desktop-panel>
