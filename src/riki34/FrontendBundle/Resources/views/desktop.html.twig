@@ -1,7 +1,9 @@
 {% extends 'riki34FrontendBundle::index.html.twig' %}
 
 {% block body %}
-    <section id="my-private-desktop-app" ng-app="kernel" class="app" ng-controller="applicationController as app">
+    <section id="my-private-desktop-app"
+             ng-app="kernel" class="app"
+             ng-controller="applicationController as app">
         <desktop desktop-id="{{ desktop_id }}"></desktop>
     </section>
 {% endblock %}

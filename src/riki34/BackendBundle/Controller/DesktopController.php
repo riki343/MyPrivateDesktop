@@ -29,7 +29,14 @@ class DesktopController extends Controller {
 
         $desktop = $em->find('riki34BackendBundle:Desktop', $desktop_id);
 
-        return new Response($this->get('jms_serializer')->serialize($desktop, 'json'));
+        $serialized = $desktop->getFullInArray();
+        $serialized['settings'] = [
+            'backgroundImage' => "url('/images/1.jpg')",
+            'backgroundRepeat' => 'no-repeat',
+            'backgroundPosition' => 'center',
+            'backgroundSize' => 'cover'
+        ];
+        return new JsonResponse($serialized);
     }
 
     /**

@@ -64,6 +64,28 @@ class Desktop
         $this->grid = [];
     }
 
+    public function getFullInArray() {
+        return [
+            'id' => $this->id,
+            'userID' => $this->userId,
+            'settings' => $this->settings,
+            'grid' => $this->grid,
+            'created' => $this->created->format(\DateTime::ISO8601),
+            'updated' => $this->updated->format(\DateTime::ISO8601),
+        ];
+    }
+
+    public function getMinInArray() {
+        return [
+            'id' => $this->id,
+            'userID' => $this->userId,
+            'settings' => $this->settings,
+            'grid' => $this->grid,
+            'created' => $this->created->format(\DateTime::ISO8601),
+            'updated' => $this->updated->format(\DateTime::ISO8601),
+        ];
+    }
+
 
     /**
      * Get id

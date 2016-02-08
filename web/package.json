@@ -1,0 +1,11 @@
+{
+  "name": "MyPrivateDesktop",
+  "version": "0.0.0",
+  "description": "This is frontend of MyPrivateDesktop project",
+  "main": "Application.js",
+  "scripts": {
+    "compile": "tsc --target es5 --sourcemap --out compiled/Kernel.js typescripts/all.ts"
+  },
+  "author": "riki34 & DARCKKING",
+  "license": "ISC"
+}

@@ -1,0 +1,3 @@
+/// <reference path='Declarations/declarations.d.ts' />
+/// <reference path='Events/events.d.ts' />
+/// <reference path='Factory/factories.d.ts' />
