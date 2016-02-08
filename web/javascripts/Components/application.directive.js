@@ -7,15 +7,15 @@
         function Link($scope, $element) {
             $element.remove();
 
-            var windowTemplate =
-                '<div style="background-color: white; color: black; overflow: hidden;" class="no-select" ng-mousedown="selectDirective();">' +
-                    '<p style=\"background-color: lightblue; height: 23px; width: 100%; margin: 0; display: table; cursor: pointer; padding: 0 5px;\" '+
-                        'ng-mousedown=\"down($event);\">' +
-                            '<span class="menu-button" ng-click="closeProcess();"><i class="fa fa-close fa-fw"></i></span>' +
-                            '<span class="menu-button" ng-click="toggleFullscreen();"><i class="fa fa-windows fa-fw"></i></span>' +
-                            '<span class="menu-button" ng-click="collapse();"><i class="fa fa-minus fa-fw"></i></span>' +
-                    '</p>' +
+            var windowTemplate = '<div style="background-color: white; color: black; overflow: hidden;" class="no-select" ng-mousedown="selectDirective();">' +
+                '<p style=\"background-color: lightblue; height: 23px; width: 100%; margin: 0; display: table; cursor: pointer; padding: 0 5px;\" '+
+                'ng-mousedown=\"down($event);\">' +
+                '<span class="menu-button" ng-click="closeProcess();"><i class="fa fa-close fa-fw"></i></span>' +
+                '<span class="menu-button" ng-click="toggleFullscreen();"><i class="fa fa-windows fa-fw"></i></span>' +
+                '<span class="menu-button" ng-click="collapse();"><i class="fa fa-minus fa-fw"></i></span>' +
+                '</p>' +
                 '</div>';
+
 
             var directive = null;
             var fullscreen = false;

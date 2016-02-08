@@ -111,9 +111,11 @@
                         if (index) {
                             $scope.apps.splice(data.index, 1);
                         }
-                    });for (var i in $scope.apps) {
-                        $scope.apps[i].selected = (parseInt(i) === data);
-                    }
+                    });
+
+                    //for (var i in $scope.apps) {
+                    //    $scope.apps[i].selected = (parseInt(i) === data);
+                    //}
 
                     $scope.$on('ApplicationSelected', function (event, data) {
                         for (var i in $scope.apps) {

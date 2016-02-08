@@ -2,7 +2,7 @@
 
 {% block stylesheets %}
     {% stylesheets '@css' filter="cssrewrite" output="css/all.css" %}
-        <link rel="stylesheet" type="text/css" href="{{ asset_url }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset_url }}"/>
     {% endstylesheets %}
 {% endblock %}
 
@@ -11,19 +11,15 @@
     <script src="{{ path('fos_js_routing_js', {'callback': 'fos.Router.setData'}) }}"></script>
 
     {% javascripts
-        '@vendors'
-        '@modules'
-        '@models'
-        '@services'
-        '@controllers'
-        '@components'
-        output="/js/all.js"
+    '@vendors'
+    '@modules'
+    output="/js/all.js"
     %}
-        <script type="text/javascript" rel="script" src="{{ asset_url }}"></script>
+    <script type="text/javascript" rel="script" src="{{ asset_url }}"></script>
     {% endjavascripts %}
     <script type="text/javascript" rel="script">
         new WOW().init();
-//        var section = document.getElementById('my-private-desktop-app');
-//        angular.bootstrap(section, [ 'kernel' ]);
+        //        var section = document.getElementById('my-private-desktop-app');
+        //        angular.bootstrap(section, [ 'kernel' ]);
     </script>
 {% endblock %}

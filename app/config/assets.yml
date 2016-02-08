@@ -24,13 +24,7 @@ assetic:
                 - 'vendor/angular-sortable-view/angular-sortable-view.min.js'
         modules:
             inputs:
-                - 'javascripts/models.js'
-                - 'javascripts/services.js'
-                - 'javascripts/environment.js'
-                - 'javascripts/user.js'
-                - 'javascripts/controllers.js'
-                - 'javascripts/components.js'
-                - 'javascripts/kernel.js'
+                - 'javascripts/Kernel.js'
         models:
             inputs:
                 - 'javascripts/Model/*'

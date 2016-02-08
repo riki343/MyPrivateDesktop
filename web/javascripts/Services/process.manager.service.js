@@ -11,6 +11,7 @@
             'launch': function (app) {
                 $rootScope.$broadcast('NewAppLaunch', app)
             },
+
             'addProcess': function (process, user, index) {
                 var newProcess = { 'pid': null, 'name': process, 'user': user, 'index': index };
                 var pid = 0;

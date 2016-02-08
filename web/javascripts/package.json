@@ -1,0 +1,12 @@
+{
+  "name": "MyPrivateDesktop",
+  "version": "0.0.0",
+  "description": "This is frontend of MyPrivateDesktop project",
+  "main": "Application.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "compile": "tsc --target es5 --sourcemap --out Kernel.js _all.ts"
+  },
+  "author": "riki34 & DARCKKING",
+  "license": "ISC"
+}
