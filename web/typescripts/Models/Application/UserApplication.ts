@@ -2,7 +2,7 @@
 
 module Kernel {
     export class UserApplication extends Application{
-        constructor(name:string, settings:ApplicationWindowSettings,processManager:ProcessManagerInterface) {
+        constructor(name:string, settings:ApplicationWindowSettings,processManager:IProcessManager) {
             super(name, settings, processManager);
             this.type = 'user';
         }

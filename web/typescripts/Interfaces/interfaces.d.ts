@@ -1,2 +1,3 @@
 /// <reference path='../all.ts' />
-/// <reference path='ProcessManagerInterface.ts' />
+/// <reference path='IProcessManager.ts' />
+/// <reference path='IApplicationPackage.ts' />

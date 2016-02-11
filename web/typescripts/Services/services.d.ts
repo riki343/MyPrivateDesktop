@@ -3,3 +3,4 @@
 /// <reference path='SpinnerService.ts' />
 /// <reference path='FilesystemService.ts' />
 /// <reference path='DesktopService.ts' />
+/// <reference path='ApplicationLauncher.ts' />

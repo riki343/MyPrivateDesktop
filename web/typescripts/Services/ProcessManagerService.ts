@@ -1,7 +1,7 @@
 /// <reference path='services.d.ts' />
 
 module Kernel {
-    export class ProcessManagerService implements ProcessManagerInterface {
+    export class ProcessManagerService implements IProcessManager {
         private processList: Array<ProcessListItem> = [];
         private processCount;
 

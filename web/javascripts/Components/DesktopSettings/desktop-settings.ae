@@ -4,27 +4,15 @@
     "name": "desktop-settings",
     "file": "desktop-settings.js"
   },
-
   "bootstrapView": "desktop-settings.html",
-
-  "systemDependencies": [
-    "kernel"
-  ],
-
+  "systemDependencies": [ "kernel" ],
   "dependencies": [],
-
-  "javascript": [
-    {
+  "javascript": [{
       "type": "controller",
       "name": "desktopSettingsController",
       "file": "Controllers/desktop-settings.controller.js"
-    }
-  ],
-
-  "resources": [
-
-  ],
-
+  }],
+  "resources": [],
   "info": {
     "author": "",
     "email": "",

@@ -15,9 +15,9 @@ module Kernel {
         public controller = 'DesktopPanelDirectiveController';
         public controllerAs = 'panel';
 
-        public static $inject = ['$window'];
+        public static $inject = ['$window', '$document'];
 
-        constructor(private window: ng.IWindowService) {}
+        constructor(private window: ng.IWindowService, private document: any) {}
 
         public link = ($scope: iDesktopPanelDirectiveScope, $element: ng.IRootElementService) => {
             let window = this.window;
@@ -25,12 +25,13 @@ module Kernel {
                 $scope.settings = {
                     'height': '30px',
                     'width': '100%',
-                    'background-color': 'rgba(143, 195, 255, 0.8)',
+                    'background-color': 'rgba(143, 195, 255, 0.6)',
                     'position': 'fixed',
                     'bottom': '0',
                     'left': '0'
                 };
             }
+
 
             let panelMenu = $element.find('div.desktop-panel-menu');
             let panelBottom = parseInt($scope.settings.height.replace('px', '')) + 3;
@@ -43,7 +44,7 @@ module Kernel {
                 panelMenu.css('width', (window.innerWidth * 0.35) + 'px');
             };
 
-            angular.element(window).bind('resize', function (event) {
+            angular.element(window).on('resize', function (event) {
                 resizePanelMenu();
             });
 
@@ -51,7 +52,7 @@ module Kernel {
         };
 
         public static Factory() {
-            const directive = ($window: ng.IWindowService) => new DesktopPanelDirective($window);
+            const directive = ($window: ng.IWindowService, $document: ng.IDocumentService) => new DesktopPanelDirective($window, $document);
 
             return directive;
         }

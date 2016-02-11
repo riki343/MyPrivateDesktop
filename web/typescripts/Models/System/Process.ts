@@ -8,7 +8,7 @@ module Kernel {
         private _type: string = 'base';
         private _name: string;
         private _pid: number;
-        private _processManager: ProcessManagerInterface;
+        private _processManager: IProcessManager;
 
         constructor(name, processManager) {
             this._name = name;
@@ -35,7 +35,7 @@ module Kernel {
             return this._pid;
         }
 
-        get processManager():ProcessManagerInterface {
+        get processManager():IProcessManager {
             return this._processManager;
         }
     }

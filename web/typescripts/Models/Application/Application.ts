@@ -5,8 +5,9 @@ module Kernel {
     {
         private _template: string;
         private _settings: ApplicationWindowSettings;
+        private
 
-        constructor(name: string, settings: ApplicationWindowSettings, processManager: ProcessManagerInterface) {
+        constructor(name: string, settings: ApplicationWindowSettings, processManager: IProcessManager) {
             super(name, processManager);
             this._settings = settings;
             this._template = Application.createTemplate(settings);
