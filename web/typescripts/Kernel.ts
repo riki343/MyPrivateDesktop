@@ -13,7 +13,9 @@ module Kernel {
         .controller('applicationController', ApplicationController)
         .controller('DesktopDirectiveController', DesktopDirectiveController)
         .controller('DesktopPanelDirectiveController', DesktopPanelDirectiveController)
+        .controller('DesktopGridDirectiveController', DesktopGridDirectiveController)
         .directive('desktop', DesktopDirective.Factory())
+        .directive('desktopGrid', DesktopGridDirective.Factory())
         .directive('desktopPanel', DesktopPanelDirective.Factory())
     ;
 }

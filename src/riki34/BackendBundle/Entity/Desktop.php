@@ -64,6 +64,8 @@ class Desktop
         $this->grid = [];
     }
 
+
+    // TODO: implement getSettings() Function!
     public function getFullInArray() {
         return [
             'id' => $this->id,

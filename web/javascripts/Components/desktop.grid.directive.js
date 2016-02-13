@@ -5,7 +5,7 @@
 
     function Directive() {
         return {
-            'templateUrl': '/javascripts/Views/desktop.grid.directive.html',
+            'templateUrl': '/views/desktop.grid.directive.html',
             'link': Link,
             'scope': {
                 'grid': '=grid'

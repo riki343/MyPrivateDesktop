@@ -15,7 +15,7 @@ module Kernel {
         }
     }
 
-    interface iDesktopDirectiveScope extends ng.IScope{
+    interface iDesktopDirectiveScope extends ng.IScope {
         background: any;
         applications: any;
         apps: any;
@@ -52,6 +52,8 @@ module Kernel {
                     scope.apps = [];
                     scope.package  = '/javascripts/Components/ProcessManager/process-manager.ae';
                     scope.desktopGrid = this.desktop.initGrid();
+                    // TODO: implement function initGrid(), rewrite old code from /javascripts/Components/Old/desktop.directive.js
+                    //this.scope.grid = new DesktopGrid.initGrid();
                 }
             });
 

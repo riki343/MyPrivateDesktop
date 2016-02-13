@@ -61,4 +61,14 @@ class DesktopController extends Controller {
             return new JsonResponse(false);
         }
     }
+
+    /**
+     * @Route("/{desktop_id}/settings")
+     * @Method({"PATCH"})
+     * @param $desktopID
+     * @return JsonResponse
+     */
+    public function saveSettings ($desktopID) {
+        // TODO implement function
+    }
 }
