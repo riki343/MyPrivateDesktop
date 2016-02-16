@@ -1,40 +1,101 @@
-//module Kernel {
-//    export class ApplicationLauncher
-//    {
-//        public static $inject = ['$http', '$compile', 'ProcessManager', '$document', '$rootScope'];
-//
-//        constructor(
-//            private http: ng.IHttpService,
-//            private compile: ng.ICompileService,
-//            private processManager: IProcessManager,
-//            private document: ng.IDocumentService,
-//            private rootScope: ng.IRootScopeService
-//        ) {}
-//
-//        public launchApplication = (pack: string, pm: IProcessManager) => {
-//            let promise = this.http.get(pack);
-//            promise.success(this.bootstrap);
-//        };
-//
-//        private bootstrap (response: any) {
-//            let application = new SystemApplication(name, settings, pm);
-//            application.run();
-//        }
-//
-//        public static Factory() {
-//            const factory = (
-//                $http: ng.IHttpService,
-//                $compile: ng.ICompileService,
-//                processManager: IProcessManager,
-//                $document: ng.IDocumentService,
-//                $rootScope: ng.IRootScopeService
-//            ) => new ApplicationLauncher($http, $compile, processManager, $document, $rootScope);
-//
-//            return factory;
-//        }
-//    }
-//}
-//
+module Kernel {
+    class WindowListItem {
+        constructor(
+            public pid: number,
+            public template: JQuery,
+            public process: Process,
+            public applicationPackage: IApplicationPackage
+        ) {}
+    }
+
+    export class ApplicationLauncher
+    {
+        private windowList: Array<WindowListItem>;
+        public static $inject = ['$http', '$compile', 'processManagerService', '$document', '$rootScope'];
+
+        constructor(
+            private http: ng.IHttpService,
+            private compile: ng.ICompileService,
+            private processManager: IProcessManager,
+            private document: ng.IDocumentService,
+            private rootScope: ng.IRootScopeService
+        ) {
+            // Register events
+            this.rootScope.$on('ApplicationClosed', this.onApplicationClosed);
+        }
+
+        public launchApplication = (pack: string): void => {
+            // Get app package
+            let promise = this.http.get(pack);
+            // Handle response
+            promise.success(this.bootstrap);
+        };
+
+        private bootstrap (response: IApplicationPackage) {
+            let windowBox = new WindowBox(
+                response.settings.top, response.settings.left,
+                response.settings.width, response.settings.height
+            );
+            let appSettings = new ApplicationWindowSettings(windowBox);
+            let application = new SystemApplication(response.module.name, appSettings, this.processManager);
+            let compiledTemplate = this.compileTemplate(application.template, application.name);
+            this.loadModule(response.folder, response.module, response.javascript, compiledTemplate);
+
+            // Add application to process manager
+            application.run();
+
+            // Add application to applications list
+            this.windowList.push(new WindowListItem(
+                application.pid,
+                compiledTemplate,
+                application,
+                response
+            ));
+        };
+
+        private loadModule = (folder: string, module: IModuleMainFile, files: Array<IModuleFile>, template: JQuery) => {
+            let basePath = 'http://desktop.dev/applications/system/' + folder + '/';
+            yepnope.injectJs(basePath + module.file, () => {
+                let filesToLoad = [];
+                for (let i = 0; i < files.length; i++) {
+                    filesToLoad.push(basePath + files[i].file);
+                }
+                yepnope(filesToLoad, () => {
+                    angular.bootstrap(template, [module.name]);
+                });
+            });
+        };
+
+        private compileTemplate = (template: string, name: string): JQuery => {
+            let compiled = this.compile(angular.element(template))(this.rootScope);
+            let appLayer = this.document.find('div#applications-layer');
+            var appContainer = angular.element('<div style="height: 100%; overflow: auto;" ui-view="' + name + '"></div>');
+            appContainer.attr('id', name);
+            appContainer.append(compiled);
+            appLayer.append(appContainer);
+            appContainer = this.compile(appContainer)(this.rootScope);
+
+            return appContainer;
+        };
+
+        private onApplicationClosed = (event: any, data: any) => {
+
+        };
+
+        public static Factory() {
+            const factory = (
+                $http: ng.IHttpService,
+                $compile: ng.ICompileService,
+                processManagerService: IProcessManager,
+                $document: ng.IDocumentService,
+                $rootScope: ng.IRootScopeService
+            ) => new ApplicationLauncher($http, $compile, processManagerService, $document, $rootScope);
+
+            return factory;
+        }
+    }
+}
+
 //(function (angular) {
 //    angular.module('components').directive('application', Directive);
 //

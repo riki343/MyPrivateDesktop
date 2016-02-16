@@ -1,13 +1,29 @@
 module Kernel {
-    export interface IApplicationPackage
-    {
+    export interface IModuleFile {
+        type: string;
+        name: string;
+        file: string;
+    }
+
+    export interface IModuleMainFile {
+        name: string;
+        file: string;
+    }
+
+    export interface IApplicationPackage {
         folder: string;
-        module: Object;
+        module: IModuleMainFile;
         bootstrapView: string;
         systemDependencies: Array<string>;
         dependencies: Array<string>;
-        javascript: Array<Object>;
+        javascript: Array<IModuleFile>;
         resources: Array<any>;
+        settings: {
+            top: number;
+            left: number;
+            width: number;
+            height: number;
+        };
         info: Object;
     }
 }

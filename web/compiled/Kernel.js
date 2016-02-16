@@ -645,43 +645,81 @@ var Kernel;
     })();
     Kernel.DesktopService = DesktopService;
 })(Kernel || (Kernel = {}));
-//module Kernel {
-//    export class ApplicationLauncher
-//    {
-//        public static $inject = ['$http', '$compile', 'ProcessManager', '$document', '$rootScope'];
-//
-//        constructor(
-//            private http: ng.IHttpService,
-//            private compile: ng.ICompileService,
-//            private processManager: IProcessManager,
-//            private document: ng.IDocumentService,
-//            private rootScope: ng.IRootScopeService
-//        ) {}
-//
-//        public launchApplication = (pack: string, pm: IProcessManager) => {
-//            let promise = this.http.get(pack);
-//            promise.success(this.bootstrap);
-//        };
-//
-//        private bootstrap (response: any) {
-//            let application = new SystemApplication(name, settings, pm);
-//            application.run();
-//        }
-//
-//        public static Factory() {
-//            const factory = (
-//                $http: ng.IHttpService,
-//                $compile: ng.ICompileService,
-//                processManager: IProcessManager,
-//                $document: ng.IDocumentService,
-//                $rootScope: ng.IRootScopeService
-//            ) => new ApplicationLauncher($http, $compile, processManager, $document, $rootScope);
-//
-//            return factory;
-//        }
-//    }
-//}
-//
+var Kernel;
+(function (Kernel) {
+    var WindowListItem = (function () {
+        function WindowListItem(pid, template, process, applicationPackage) {
+            this.pid = pid;
+            this.template = template;
+            this.process = process;
+            this.applicationPackage = applicationPackage;
+        }
+        return WindowListItem;
+    })();
+    var ApplicationLauncher = (function () {
+        function ApplicationLauncher(http, compile, processManager, document, rootScope) {
+            var _this = this;
+            this.http = http;
+            this.compile = compile;
+            this.processManager = processManager;
+            this.document = document;
+            this.rootScope = rootScope;
+            this.launchApplication = function (pack) {
+                // Get app package
+                var promise = _this.http.get(pack);
+                // Handle response
+                promise.success(_this.bootstrap);
+            };
+            this.loadModule = function (folder, module, files, template) {
+                var basePath = 'http://desktop.dev/applications/system/' + folder + '/';
+                yepnope.injectJs(basePath + module.file, function () {
+                    var filesToLoad = [];
+                    for (var i = 0; i < files.length; i++) {
+                        filesToLoad.push(basePath + files[i].file);
+                    }
+                    yepnope(filesToLoad, function () {
+                        angular.bootstrap(template, [module.name]);
+                    });
+                });
+            };
+            this.compileTemplate = function (template, name) {
+                var compiled = _this.compile(angular.element(template))(_this.rootScope);
+                var appLayer = _this.document.find('div#applications-layer');
+                var appContainer = angular.element('<div style="height: 100%; overflow: auto;" ui-view="' + name + '"></div>');
+                appContainer.attr('id', name);
+                appContainer.append(compiled);
+                appLayer.append(appContainer);
+                appContainer = _this.compile(appContainer)(_this.rootScope);
+                return appContainer;
+            };
+            this.onApplicationClosed = function (event, data) {
+            };
+            // Register events
+            this.rootScope.$on('ApplicationClosed', this.onApplicationClosed);
+        }
+        ApplicationLauncher.prototype.bootstrap = function (response) {
+            var windowBox = new Kernel.WindowBox(response.settings.top, response.settings.left, response.settings.width, response.settings.height);
+            var appSettings = new Kernel.ApplicationWindowSettings(windowBox);
+            var application = new Kernel.SystemApplication(response.module.name, appSettings, this.processManager);
+            var compiledTemplate = this.compileTemplate(application.template, application.name);
+            this.loadModule(response.folder, response.module, response.javascript, compiledTemplate);
+            // Add application to process manager
+            application.run();
+            // Add application to applications list
+            this.windowList.push(new WindowListItem(application.pid, compiledTemplate, application, response));
+        };
+        ;
+        ApplicationLauncher.Factory = function () {
+            var factory = function ($http, $compile, processManagerService, $document, $rootScope) {
+                return new ApplicationLauncher($http, $compile, processManagerService, $document, $rootScope);
+            };
+            return factory;
+        };
+        ApplicationLauncher.$inject = ['$http', '$compile', 'processManagerService', '$document', '$rootScope'];
+        return ApplicationLauncher;
+    })();
+    Kernel.ApplicationLauncher = ApplicationLauncher;
+})(Kernel || (Kernel = {}));
 //(function (angular) {
 //    angular.module('components').directive('application', Directive);
 //
@@ -923,7 +961,7 @@ var Kernel;
     })();
     Kernel.DesktopDirective = DesktopDirective;
     var DesktopDirectiveController = (function () {
-        function DesktopDirectiveController(scope, window, document, fs, rootScope, http, desktopService) {
+        function DesktopDirectiveController(scope, window, document, fs, rootScope, http, desktopService, applicationLauncher, processManager) {
             var _this = this;
             this.scope = scope;
             this.window = window;
@@ -932,6 +970,11 @@ var Kernel;
             this.rootScope = rootScope;
             this.http = http;
             this.desktopService = desktopService;
+            this.applicationLauncher = applicationLauncher;
+            this.processManager = processManager;
+            this.launch = function (pack) {
+                _this.applicationLauncher.launchApplication(pack);
+            };
             // EVENTS
             this.DesktopImageChanged = function (event, data) {
                 _this.scope.background.settings['background-image'] = data;
@@ -1001,7 +1044,8 @@ var Kernel;
         };
         DesktopDirectiveController.$inject = [
             '$scope', '$window', '$document', 'filesystemService',
-            '$rootScope', '$http', 'desktopService'
+            '$rootScope', '$http', 'desktopService',
+            'applicationLauncherService'
         ];
         return DesktopDirectiveController;
     })();
@@ -1112,6 +1156,7 @@ var Kernel;
         .factory('spinnerService', Kernel.SpinnerService.Factory())
         .factory('desktopService', Kernel.DesktopService.Factory())
         .factory('processManagerService', Kernel.ProcessManagerService.Factory())
+        .factory('applicationLauncherService', Kernel.ApplicationLauncher.Factory())
         .controller('applicationController', Kernel.ApplicationController)
         .controller('DesktopDirectiveController', Kernel.DesktopDirectiveController)
         .controller('DesktopPanelDirectiveController', Kernel.DesktopPanelDirectiveController)

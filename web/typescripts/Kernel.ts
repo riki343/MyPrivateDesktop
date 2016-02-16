@@ -10,6 +10,7 @@ module Kernel {
         .factory('spinnerService', SpinnerService.Factory())
         .factory('desktopService', DesktopService.Factory())
         .factory('processManagerService', ProcessManagerService.Factory())
+        .factory('applicationLauncherService', ApplicationLauncher.Factory())
         .controller('applicationController', ApplicationController)
         .controller('DesktopDirectiveController', DesktopDirectiveController)
         .controller('DesktopPanelDirectiveController', DesktopPanelDirectiveController)

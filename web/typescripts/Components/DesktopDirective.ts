@@ -23,13 +23,15 @@ module Kernel {
         desktopGrid: any;
         desktopId: any;
         desktop: any;
+        launch: Function;
     }
 
     export class DesktopDirectiveController {
         private desktop;
         public static $inject = [
             '$scope', '$window', '$document', 'filesystemService',
-            '$rootScope', '$http', 'desktopService'
+            '$rootScope', '$http', 'desktopService',
+            'applicationLauncherService'
         ];
 
         constructor(
@@ -39,7 +41,9 @@ module Kernel {
             private fs: FilesystemService,
             private rootScope: ng.IRootScopeService,
             private http: ng.IHttpService,
-            private desktopService: DesktopService
+            private desktopService: DesktopService,
+            private applicationLauncher: ApplicationLauncher,
+            private processManager: IProcessManager
         ) {
             let promise = this.desktopService.getDesktop(this.scope.desktop.desktopId);
             promise.then((response) => {
@@ -63,6 +67,10 @@ module Kernel {
             angular.element(this.window).bind('keydown', this.KeyDown);
             angular.element(this.window).bind('resize', this.Resize);
         }
+
+        public launch = (pack: string) => {
+            this.applicationLauncher.launchApplication(pack);
+        };
 
         public createBackground (response) {
             return {

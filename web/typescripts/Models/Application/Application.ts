@@ -3,9 +3,8 @@
 module Kernel {
     export abstract class Application extends Process
     {
-        private _template: string;
-        private _settings: ApplicationWindowSettings;
-        private
+        protected _template: string;
+        protected _settings: ApplicationWindowSettings;
 
         constructor(name: string, settings: ApplicationWindowSettings, processManager: IProcessManager) {
             super(name, processManager);
@@ -32,11 +31,11 @@ module Kernel {
             this._template = value;
         }
 
-        get settings():ApplicationWindowSettings {
+        get settings():Kernel.ApplicationWindowSettings {
             return this._settings;
         }
 
-        set settings(value:ApplicationWindowSettings) {
+        set settings(value:Kernel.ApplicationWindowSettings) {
             this._settings = value;
         }
     }
