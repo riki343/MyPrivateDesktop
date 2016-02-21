@@ -20,7 +20,6 @@ module Kernel {
         applications: any;
         apps: any;
         package: any;
-        desktopGrid: any;
         desktopId: any;
         desktop: any;
         launch: Function;
@@ -55,7 +54,7 @@ module Kernel {
                     scope.applications = [];
                     scope.apps = [];
                     scope.package  = '/javascripts/Components/ProcessManager/process-manager.ae';
-                    scope.desktopGrid = this.desktop.initGrid();
+                    this.desktop.initGrid(this.window.innerHeight,this.window.innerWidth);
                     // TODO: implement function initGrid(), rewrite old code from /javascripts/Components/Old/desktop.directive.js
                     //this.scope.grid = new DesktopGrid.initGrid();
                 }
@@ -101,7 +100,7 @@ module Kernel {
         };
 
         public DesktopGridStateChanged = (event, data) => {
-            this.desktop.saveGrid(this.scope.desktopId, this.scope.desktopGrid);
+            this.desktop.saveGrid(this.scope.desktopId, this.desktop.desktopGrid);
         };
 
         public KeyDown = (event) => {

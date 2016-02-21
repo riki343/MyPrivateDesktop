@@ -1,3 +1,4 @@
+/// <reference path='components.d.ts' />
 module Kernel {
     export class DesktopGridDirective implements ng.IDirective {
         public templateUrl = '/views/desktop.grid.directive.html';
@@ -15,7 +16,7 @@ module Kernel {
     }
 
     interface iDesktopGridDirectiveController extends ng.IScope {
-
+        grid: DesktopGrid;
     }
 
     export class DesktopGridDirectiveController {

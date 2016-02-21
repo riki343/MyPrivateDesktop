@@ -393,10 +393,6 @@ var Kernel;
             this.height = height;
             this._id = data.id;
             this._userId = data.userId;
-            this._grid = [];
-            for (var i = 0; i < data.grid.length; i++) {
-                this._grid.push(new Kernel.DesktopItem(data.grid[i]));
-            }
             this._settings = new Kernel.DesktopSettings(data.settings);
             this._created = data.created;
             this._updated = data.updated;
@@ -443,22 +439,28 @@ var Kernel;
             enumerable: true,
             configurable: true
         });
-        Desktop.prototype.initGrid = function () {
-            var x = this.width / 30;
-            var y = this.height / 20;
-            var cells = [];
-            for (var i = 0; i < 600; i++) {
-                cells.push(new Kernel.DesktopItem());
-            }
-            return {
-                'cellWidth': x,
-                'cellHeight': y,
-                'cells': cells
-            };
+        Desktop.prototype.initGrid = function (height, width) {
+            this._grid = new Kernel.DesktopGrid(height, width);
         };
         return Desktop;
     })();
     Kernel.Desktop = Desktop;
+})(Kernel || (Kernel = {}));
+/// <reference path='../models.d.ts' />
+var Kernel;
+(function (Kernel) {
+    var DesktopGrid = (function () {
+        function DesktopGrid(height, width) {
+            this._cells = [];
+            this._rows = height / 20;
+            this._cols = width / 30;
+            for (var i = 0; i < 50; i++) {
+                this._cells.push(new Kernel.DesktopItem());
+            }
+        }
+        return DesktopGrid;
+    })();
+    Kernel.DesktopGrid = DesktopGrid;
 })(Kernel || (Kernel = {}));
 /// <reference path='services.d.ts' />
 var Kernel;
@@ -980,7 +982,7 @@ var Kernel;
                 _this.scope.background.settings['background-image'] = data;
             };
             this.DesktopGridStateChanged = function (event, data) {
-                _this.desktop.saveGrid(_this.scope.desktopId, _this.scope.desktopGrid);
+                _this.desktop.saveGrid(_this.scope.desktopId, _this.desktop.desktopGrid);
             };
             this.KeyDown = function (event) {
                 if (event.ctrlKey && event.shiftKey) {
@@ -1010,7 +1012,7 @@ var Kernel;
                     scope.applications = [];
                     scope.apps = [];
                     scope.package = '/javascripts/Components/ProcessManager/process-manager.ae';
-                    scope.desktopGrid = _this.desktop.initGrid();
+                    _this.desktop.initGrid(_this.window.innerHeight, _this.window.innerWidth);
                 }
             });
             // Register events
@@ -1112,6 +1114,7 @@ var Kernel;
     })();
     Kernel.DesktopPanelDirectiveController = DesktopPanelDirectiveController;
 })(Kernel || (Kernel = {}));
+/// <reference path='components.d.ts' />
 var Kernel;
 (function (Kernel) {
     var DesktopGridDirective = (function () {

@@ -10,3 +10,4 @@
 /// <reference path='Desktop/DesktopSettings.ts' />
 /// <reference path='Desktop/DesktopItem.ts' />
 /// <reference path='Desktop/Desktop.ts' />
+/// <reference path='Desktop/DesktopGrid.ts' />
