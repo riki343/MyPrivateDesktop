@@ -1,8 +1,11 @@
 module Kernel {
     export class WindowManager extends WindowContainer {
-        public static $inject = ['$document'];
+        public static $inject = ['$document', '$rootScope'];
 
-        constructor(private document: ng.IDocumentService) {
+        constructor(
+            private document: ng.IDocumentService,
+            private rootScope: ng.IRootScopeService
+        ) {
             super();
         }
 
@@ -32,26 +35,34 @@ module Kernel {
             }
         }
 
-        public maximizeWindow(pid: number) {
+        public maximizeWindow = (pid: number) => {
             let window = this.getWindow(pid);
             if (window !== null) {
                 if (window.process.maximized === true) {
                     window.process.maximized = false;
-                    window.template.css('height', window.process.settings.windowBox.height + 'px');
-                    window.template.css('width' , window.process.settings.windowBox.width + 'px');
-                    window.template.css('top'   , window.process.settings.windowBox.top + 'px');
-                    window.template.css('left'  , window.process.settings.windowBox.left + 'px');
+                    window.template.animate({
+                        'height':  window.process.settings.windowBox.height  + 'px',
+                        'width': window.process.settings.windowBox.width + 'px',
+                        'top': window.process.settings.windowBox.top + 'px',
+                        'left': window.process.settings.windowBox.left + 'px'
+                    }, 550, () => {
+                        this.rootScope.$broadcast('WindowStateChanged', window.pid);
+                    });
                     window.template.removeClass('maximized');
                 } else {
                     window.process.maximized = true;
-                    window.template.css('height', this.document.innerHeight() + 'px');
-                    window.template.css('width' , this.document.innerWidth() + 'px');
-                    window.template.css('top'   , '0');
-                    window.template.css('left'  , '0');
+                    window.template.animate({
+                        'height': this.document.innerHeight() + 'px',
+                        'width' : this.document.innerWidth() + 'px',
+                        'top'   : '0',
+                        'left'  : '0'
+                    }, 550, () => {
+                        this.rootScope.$broadcast('WindowStateChanged', window.pid);
+                    });
                     window.template.addClass('maximized');
                 }
             }
-        }
+        };
 
         public setActive(pid: number) {
             let window = this.getWindow(pid);
@@ -60,7 +71,7 @@ module Kernel {
                     if (item.process.active === true && item.pid !== pid) {
                         item.process.active = false;
                         item.template.css('z-index', '1001');
-                        item.template.css('opacity', '0.95');
+                        item.template.css('opacity', '0.9');
                     }
 
                     if (item.pid === pid) {
@@ -73,7 +84,10 @@ module Kernel {
         }
 
         public static Factory() {
-            const factory = ($document: ng.IDocumentService) => new WindowManager($document);
+            const factory = (
+                $document: ng.IDocumentService,
+                $rootScope: ng.IRootScopeService
+            ) => new WindowManager($document, $rootScope);
 
             return factory;
         }

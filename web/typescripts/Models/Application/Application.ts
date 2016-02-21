@@ -13,6 +13,7 @@ module Kernel {
         private _maximized: boolean;
         private _collapsed: boolean;
         private _active   : boolean;
+        private parentClose: Function;
 
         constructor(
             name: string, settings: ApplicationWindowSettings,
@@ -52,6 +53,13 @@ module Kernel {
             }
         };
 
+        public onResize = (e, data) => {
+            if (data === this.pid) {
+                let view = this.window.find('div.application-window');
+                view.css('height', this.window.height() - 25 + 'px');
+            }
+        };
+
         public onMouseUp = (e: DragEvent) => {
             this.isDrags = false;
         };
@@ -72,6 +80,18 @@ module Kernel {
                         '</p>',
                 '</div>'
             ].join('');
+        };
+
+        public closeProcess = (): void => {
+            this.window.animate({
+                'height': '0px'
+            }, 450, 'linear', () => {
+                this.close();
+            });
+        };
+
+        public runProcess = () => {
+            this.run();
         };
 
         get template():string {

@@ -1,0 +1,36 @@
+{
+  "folder": "FileManager",
+  "module": {
+    "name": "file-manager",
+    "file": "file-manager.js"
+  },
+  "bootstrapView": "file-manager.html",
+  "systemDependencies": [ "kernel" ],
+  "dependencies": [],
+  "javascript": [
+    {
+      "type": "controller",
+      "name": "fileManagerController",
+      "file": "Controllers/file-manager.controller.js"
+    }
+  ],
+  "stylesheet": [
+    {
+      "type": "stylesheet",
+      "name": "main.css",
+      "file": "Stylesheets/main.css"
+    }
+  ],
+  "settings": {
+    "width": 640,
+    "height": 480,
+    "top": 50,
+    "left": 50
+  },
+  "resources": [],
+  "info": {
+    "author": "riki34",
+    "email": "vladislav.kosko@gmail.com",
+    "version": "0.0.1"
+  }
+}

@@ -37,12 +37,7 @@ class FilesystemController extends Controller
             return new JsonResponse(['error' => $message], 404);
         }
 
-        $file = file_get_contents($fileInfo->getFullPath());
-
-        return new JsonResponse([
-            'file' => $file,
-            'info' => $fileInfo->getFullInArray()
-        ], 200);
+        return new JsonResponse($fileInfo->getFullInArray(), 200);
     }
 
     /**
@@ -170,8 +165,9 @@ class FilesystemController extends Controller
         $dir = new UserDirectory($data['name'], $user, $parent);
         $em->persist($dir);
         $em->flush();
+        $parent->addSubdir($dir);
 
-        return new JsonResponse($dir->getFullInArray(), 201);
+        return new JsonResponse($parent->getFullInArray(), 201);
     }
 
     public function moveDirectory() {

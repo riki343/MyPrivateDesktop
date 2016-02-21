@@ -119,6 +119,12 @@ var Kernel;
                     _this.prevY = e.pageY;
                 }
             };
+            this.onResize = function (e, data) {
+                if (data === _this.pid) {
+                    var view = _this.window.find('div.application-window');
+                    view.css('height', _this.window.height() - 25 + 'px');
+                }
+            };
             this.onMouseUp = function (e) {
                 _this.isDrags = false;
             };
@@ -138,6 +144,16 @@ var Kernel;
                     '</p>',
                     '</div>'
                 ].join('');
+            };
+            this.closeProcess = function () {
+                _this.window.animate({
+                    'height': '0px'
+                }, 450, 'linear', function () {
+                    _this.close();
+                });
+            };
+            this.runProcess = function () {
+                _this.run();
             };
             this._settings = settings;
             this._template = this.createTemplate(settings);
@@ -762,11 +778,16 @@ var Kernel;
             this.http = http;
             this.q = q;
         }
-        FilesystemService.prototype.getDir = function (dir) {
-            return this.createPromise(dir);
+        FilesystemService.prototype.getDir = function (id) {
+            return this.http.get('/api/filesystem/directory/' + id);
         };
-        FilesystemService.prototype.mkDir = function (dir) {
-            return this.createPromise(dir);
+        FilesystemService.prototype.getRootDir = function () {
+            return this.http.get('/api/filesystem/directory');
+        };
+        FilesystemService.prototype.mkDir = function (parent_id, dir) {
+            return this.http.put('/api/filesystem/directory/' + parent_id, {
+                'name': dir
+            });
         };
         FilesystemService.prototype.rmDir = function (dir) {
             return this.createPromise(dir);
@@ -870,7 +891,7 @@ var Kernel;
                 var promise = _this.loadModule(response.folder, response.module, files);
                 promise.then(function () {
                     // Add application to process manager
-                    application.run();
+                    application.runProcess();
                     compiledTemplate.attr('id', 'application-' + application.pid);
                     // Bootstrap new angular module
                     var app = angular.bootstrap(compiledTemplate, [response.module.name]);
@@ -902,14 +923,17 @@ var Kernel;
                 // Add attributes
                 container.attr('ui-view', application.name);
                 container.attr('class', application.name + '-main');
+                container.addClass('application-window');
+                container.css('height', application.settings.windowBox.height - 25 + 'px');
                 appContainer.append(container);
+                _this.rootScope.$on('WindowStateChanged', application.onResize);
                 // Append template to div#applications-layer
                 _this.applicationLayer.append(appContainer);
                 return appContainer;
             };
             this.defineWindowEvents = function ($rootScope, application) {
                 // Define application close event
-                $rootScope.close = application.close;
+                $rootScope.close = application.closeProcess;
                 // Define mouse events to move application
                 $rootScope.onMouseDown = application.onMouseDown;
                 _this.document.on('mousemove', application.onMouseMove);
@@ -1000,9 +1024,40 @@ var Kernel;
 (function (Kernel) {
     var WindowManager = (function (_super) {
         __extends(WindowManager, _super);
-        function WindowManager(document) {
+        function WindowManager(document, rootScope) {
+            var _this = this;
             _super.call(this);
             this.document = document;
+            this.rootScope = rootScope;
+            this.maximizeWindow = function (pid) {
+                var window = _this.getWindow(pid);
+                if (window !== null) {
+                    if (window.process.maximized === true) {
+                        window.process.maximized = false;
+                        window.template.animate({
+                            'height': window.process.settings.windowBox.height + 'px',
+                            'width': window.process.settings.windowBox.width + 'px',
+                            'top': window.process.settings.windowBox.top + 'px',
+                            'left': window.process.settings.windowBox.left + 'px'
+                        }, 550, function () {
+                            _this.rootScope.$broadcast('WindowStateChanged', window.pid);
+                        });
+                        window.template.removeClass('maximized');
+                    }
+                    else {
+                        window.process.maximized = true;
+                        window.template.animate({
+                            'height': _this.document.innerHeight() + 'px',
+                            'width': _this.document.innerWidth() + 'px',
+                            'top': '0',
+                            'left': '0'
+                        }, 550, function () {
+                            _this.rootScope.$broadcast('WindowStateChanged', window.pid);
+                        });
+                        window.template.addClass('maximized');
+                    }
+                }
+            };
         }
         WindowManager.prototype.collapseWindow = function (pid) {
             var window = this.getWindow(pid);
@@ -1027,27 +1082,6 @@ var Kernel;
                 }
             }
         };
-        WindowManager.prototype.maximizeWindow = function (pid) {
-            var window = this.getWindow(pid);
-            if (window !== null) {
-                if (window.process.maximized === true) {
-                    window.process.maximized = false;
-                    window.template.css('height', window.process.settings.windowBox.height + 'px');
-                    window.template.css('width', window.process.settings.windowBox.width + 'px');
-                    window.template.css('top', window.process.settings.windowBox.top + 'px');
-                    window.template.css('left', window.process.settings.windowBox.left + 'px');
-                    window.template.removeClass('maximized');
-                }
-                else {
-                    window.process.maximized = true;
-                    window.template.css('height', this.document.innerHeight() + 'px');
-                    window.template.css('width', this.document.innerWidth() + 'px');
-                    window.template.css('top', '0');
-                    window.template.css('left', '0');
-                    window.template.addClass('maximized');
-                }
-            }
-        };
         WindowManager.prototype.setActive = function (pid) {
             var window = this.getWindow(pid);
             if (window !== null) {
@@ -1055,7 +1089,7 @@ var Kernel;
                     if (item.process.active === true && item.pid !== pid) {
                         item.process.active = false;
                         item.template.css('z-index', '1001');
-                        item.template.css('opacity', '0.95');
+                        item.template.css('opacity', '0.9');
                     }
                     if (item.pid === pid) {
                         item.process.active = true;
@@ -1066,10 +1100,12 @@ var Kernel;
             }
         };
         WindowManager.Factory = function () {
-            var factory = function ($document) { return new WindowManager($document); };
+            var factory = function ($document, $rootScope) {
+                return new WindowManager($document, $rootScope);
+            };
             return factory;
         };
-        WindowManager.$inject = ['$document'];
+        WindowManager.$inject = ['$document', '$rootScope'];
         return WindowManager;
     })(Kernel.WindowContainer);
     Kernel.WindowManager = WindowManager;
@@ -1297,8 +1333,13 @@ var Kernel;
 (function (Kernel) {
     angular.module('kernel', [
         'ngAnimate',
-        'angular-sortable-view',
+        'ngSanitize',
         'pascalprecht.translate',
+        'com.2fdevs.videogular',
+        'com.2fdevs.videogular.plugins.controls',
+        'com.2fdevs.videogular.plugins.overlayplay',
+        'com.2fdevs.videogular.plugins.poster',
+        'com.2fdevs.videogular.plugins.buffering',
     ])
         .factory('$globalScope', globalScope)
         .factory('resourceLoaderService', Kernel.ResourceLoader.Factory())

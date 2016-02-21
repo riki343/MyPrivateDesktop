@@ -38,6 +38,12 @@ body {
     filter: alpha(opacity=20);
     opacity: .2;
     margin: 0 1px;
+
+    -webkit-transition: opacity 0.3s;
+    -moz-transition: opacity 0.3s;
+    -ms-transition: opacity 0.3s;
+    -o-transition: opacity 0.3s;
+    transition: opacity 0.3s;
 }
 
 .menu-button:hover, .menu-button:focus {
@@ -149,7 +155,7 @@ body {
 #applications-layer {}
 
 .application {
-    box-shadow: 0 0 5px 1px gray;
+    /*box-shadow: 0 0 5px 1px gray;*/
     position: absolute;
     overflow: hidden;
     background-color: white;
@@ -160,11 +166,11 @@ body {
     z-index: 1001;
 
     /* animation on un/maximize and un/collapse */
-    -webkit-transition: width, opacity 0.5s;
-    -moz-transition: width, opacity 0.5s;
-    -ms-transition: width, opacity 0.5s;
-    -o-transition: width, opacity 0.5s;
-    transition: width, opacity 0.5s;
+    -webkit-transition: opacity 0.5s;
+    -moz-transition: opacity 0.5s;
+    -ms-transition: opacity 0.5s;
+    -o-transition: opacity 0.5s;
+    transition: opacity 0.5s;
 }
 
 .application.collapsed {

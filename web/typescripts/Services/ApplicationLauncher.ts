@@ -48,7 +48,7 @@ module Kernel {
 
             promise.then(() => {
                 // Add application to process manager
-                application.run();
+                application.runProcess();
                 compiledTemplate.attr('id', 'application-' + application.pid);
 
                 // Bootstrap new angular module
@@ -92,7 +92,10 @@ module Kernel {
             // Add attributes
             container.attr('ui-view', application.name);
             container.attr('class', application.name + '-main');
+            container.addClass('application-window');
+            container.css('height', application.settings.windowBox.height - 25 + 'px');
             appContainer.append(container);
+            this.rootScope.$on('WindowStateChanged', application.onResize);
 
             // Append template to div#applications-layer
             this.applicationLayer.append(appContainer);
@@ -102,7 +105,7 @@ module Kernel {
 
         public defineWindowEvents = ($rootScope, application: Application): void => {
             // Define application close event
-            $rootScope.close = application.close;
+            $rootScope.close = application.closeProcess;
             // Define mouse events to move application
             $rootScope.onMouseDown = application.onMouseDown;
             this.document.on('mousemove', application.onMouseMove);

@@ -1,0 +1,40 @@
+{
+  "folder": "AudioPlayer",
+  "module": {
+    "name": "audio-player",
+    "file": "audio-player.js"
+  },
+  "bootstrapView": "index.html",
+  "systemDependencies": [ "kernel" ],
+  "dependencies": [],
+  "javascript": [
+    {
+      "type": "controller",
+      "name": "audioPlayerController",
+      "file": "Controllers/audio-player.controller.js"
+    }, {
+      "type": "directive",
+      "name": "audioPlayerDirective",
+      "file": "Directives/audio-player.directive.js"
+    }
+  ],
+  "stylesheet": [
+    {
+      "type": "stylesheet",
+      "name": "main.css",
+      "file": "Stylesheets/main.css"
+    }
+  ],
+  "settings": {
+    "width": 640,
+    "height": 480,
+    "top": 50,
+    "left": 50
+  },
+  "resources": [],
+  "info": {
+    "author": "riki34",
+    "email": "vladislav.kosko@gmail.com",
+    "version": "0.0.1"
+  }
+}

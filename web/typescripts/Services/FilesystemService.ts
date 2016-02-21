@@ -4,16 +4,23 @@ module Kernel {
     export class FilesystemService {
         static $inject = ['$http', '$q'];
 
-        constructor(private http:ng.IHttpService,
-                    private q:ng.IQService) {
+        constructor(
+            private http:ng.IHttpService,
+            private q:ng.IQService
+        ) {}
+
+        public getDir(id: number) {
+            return this.http.get('/api/filesystem/directory/' + id);
         }
 
-        public getDir(dir) {
-            return this.createPromise(dir);
+        public getRootDir() {
+            return this.http.get('/api/filesystem/directory');
         }
 
-        public mkDir(dir) {
-            return this.createPromise(dir);
+        public mkDir(parent_id: number, dir: string) {
+            return this.http.put('/api/filesystem/directory/' + parent_id, {
+                'name': dir
+            });
         }
 
         public rmDir(dir) {

@@ -1,0 +1,29 @@
+{
+  "name": "MyPrivateDesktop",
+  "description": "This is frontend of MyPrivateDesktop project",
+  "main": "Application.js",
+  "authors": [
+    "riki34 & DARCKKING"
+  ],
+  "license": "ISC",
+  "homepage": "https://github.com/riki343/MyPrivateDesktop",
+  "moduleType": [],
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular-full": "^1.4.8",
+    "videogular": "^1.4.1",
+    "videogular-themes-default": "^1.4.1",
+    "videogular-controls": "^1.4.1",
+    "videogular-buffering": "^1.4.1",
+    "videogular-overlay-play": "^1.4.1",
+    "videogular-poster": "^1.4.1",
+    "angular-file-upload": "^2.2.0"
+  }
+}

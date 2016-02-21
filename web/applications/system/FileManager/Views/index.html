@@ -1,0 +1,63 @@
+<div ng-controller="fileManagerController as manager" style="height: 100%;">
+    <div class="row" style="position: relative; height: 100%;">
+        <div class="col-xs-12">
+            <button type="button" class="btn btn-default btn-xs" ng-click="manager.initNewDirDialog();">
+                New directory
+            </button>
+            <hr>
+            <div style="overflow-y: scroll;">
+                <ul class="list-group">
+                    <li ng-if="manager.directory.parentID !== null"
+                        ng-click="manager.browse(manager.directory.parentID);">
+                        <a style="cursor: pointer;" class="list-group-item">
+                            <img height="32px" src="/files/resources/applications/file-manager/folder.png" alt="folder.png">
+                            ..
+                        </a>
+                    </li>
+
+                    <li ng-repeat="folder in manager.directory.subdirs"
+                        ng-click="manager.browse(folder.id);">
+                        <a style="cursor: pointer;" class="list-group-item">
+                            <img height="32px" src="/files/resources/applications/file-manager/folder.png" alt="folder.png">
+                            {{ folder.name }}
+                        </a>
+                    </li>
+
+                    <li ng-repeat="file in manager.directory.files">
+                        <a style="cursor: pointer;" class="list-group-item">
+                            <img height="32px" src="/files/resources/applications/file-manager/file.png" alt="file.png">
+                            {{ file.name }}
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="file-manager-modal" id="file-manager-new-dir-modal" tabindex="-1">
+            <div class="file-manager-modal-container medium">
+                <div class="file-manager-modal-header" style="background-color: lightblue;">
+                    New directory
+                </div>
+
+                <div class="file-manager-modal-content">
+                    <input type="text" ng-model="manager.dirname" class="form-control" placeholder="directory name...">
+                </div>
+
+                <div class="file-manager-modal-footer" style="background-color: white;">
+                    <div class="form-group">
+                        <button class="btn btn-default"
+                                ng-click="manager.closeInitNewDirDialog();"
+                                type="button">
+                            Cancel
+                        </button>
+                        <button class="btn btn-info"
+                                type="button"
+                                ng-click="manager.createNewDir(manager.dirname);">
+                            Create
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
