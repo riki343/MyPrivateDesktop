@@ -27,16 +27,6 @@ var Kernel;
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(ProcessListItem.prototype, "window", {
-            get: function () {
-                return this._window;
-            },
-            set: function (value) {
-                this._window = value;
-            },
-            enumerable: true,
-            configurable: true
-        });
         return ProcessListItem;
     })();
     Kernel.ProcessListItem = ProcessListItem;
@@ -46,7 +36,14 @@ var Kernel;
 (function (Kernel) {
     var Process = (function () {
         function Process(name, processManager) {
+            var _this = this;
             this._type = 'base';
+            this.close = function () {
+                _this._processManager.closeProcess(_this._pid);
+            };
+            this.run = function () {
+                _this._pid = _this._processManager.addProcess(_this._name, _this._type, _this);
+            };
             this._name = name;
             this._processManager = processManager;
         }
@@ -60,12 +57,6 @@ var Kernel;
             enumerable: true,
             configurable: true
         });
-        Process.prototype.close = function () {
-            this._processManager.closeProcess(this._pid);
-        };
-        Process.prototype.run = function () {
-            this._pid = this._processManager.addProcess(this._name, this._type, this);
-        };
         Object.defineProperty(Process.prototype, "name", {
             get: function () {
                 return this._name;
@@ -76,6 +67,9 @@ var Kernel;
         Object.defineProperty(Process.prototype, "pid", {
             get: function () {
                 return this._pid;
+            },
+            set: function (value) {
+                this._pid = value;
             },
             enumerable: true,
             configurable: true
@@ -101,21 +95,56 @@ var Kernel;
 (function (Kernel) {
     var Application = (function (_super) {
         __extends(Application, _super);
-        function Application(name, settings, processManager) {
+        function Application(name, settings, processManager, windowManager) {
+            var _this = this;
             _super.call(this, name, processManager);
+            this.windowManager = windowManager;
+            this.collapse = function () { _this.windowManager.collapseWindow(_this.pid); };
+            this.maximize = function () { _this.windowManager.maximizeWindow(_this.pid); };
+            this.makeActive = function () { _this.windowManager.setActive(_this.pid); };
+            this.onMouseDown = function (e) {
+                if (e.which === 1 && _this.maximized === false) {
+                    _this.prevX = e.pageX;
+                    _this.prevY = e.pageY;
+                    _this.isDrags = true;
+                }
+            };
+            this.onMouseMove = function (e) {
+                if (_this.isDrags === true && e.which === 1) {
+                    _this.settings.windowBox.left += e.pageX - _this.prevX;
+                    _this.settings.windowBox.top += e.pageY - _this.prevY;
+                    _this.window.css('left', _this.settings.windowBox.left);
+                    _this.window.css('top', _this.settings.windowBox.top);
+                    _this.prevX = e.pageX;
+                    _this.prevY = e.pageY;
+                }
+            };
+            this.onMouseUp = function (e) {
+                _this.isDrags = false;
+            };
+            this.createTemplate = function (settings) {
+                return [
+                    '<div style="color: ' + settings.header.textColor + '; ' +
+                        'top: ' + settings.windowBox.top + 'px; ' +
+                        'left: ' + settings.windowBox.left + 'px; ' +
+                        'width: ' + settings.windowBox.width + 'px;' +
+                        'height: ' + settings.windowBox.height + 'px;"' +
+                        'class="no-select application"' +
+                        'ng-mousedown="makeActive();">',
+                    '<p class="application-header" style="background-color: ' + settings.header.bgColor + ';" ng-mousedown=\"onMouseDown($event);\">',
+                    '<span class="menu-button" ng-click="close();"><i class="fa fa-close fa-fw"></i></span>',
+                    '<span class="menu-button" ng-click="maximize();"><i class="fa fa-windows fa-fw"></i></span>',
+                    '<span class="menu-button" ng-click="collapse();"><i class="fa fa-minus fa-fw"></i></span>',
+                    '</p>',
+                    '</div>'
+                ].join('');
+            };
             this._settings = settings;
-            this._template = Application.createTemplate(settings);
+            this._template = this.createTemplate(settings);
+            this._collapsed = false;
+            this._maximized = false;
+            this._active = true;
         }
-        Application.createTemplate = function (settings) {
-            return '<div style="background-color: white; color: ' + settings.header.textColor + '; overflow: hidden;" class="no-select" ng-mousedown="selectDirective();">' +
-                '<p style=\"background-color: ' + settings.header.bgColor + '; height: 23px; width: 100%; margin: 0; display: table; cursor: pointer; padding: 0 5px;\" ' +
-                'ng-mousedown=\"down($event);\">' +
-                '<span class="menu-button" ng-click="closeProcess();"><i class="fa fa-close fa-fw"></i></span>' +
-                '<span class="menu-button" ng-click="toggleFullscreen();"><i class="fa fa-windows fa-fw"></i></span>' +
-                '<span class="menu-button" ng-click="collapse();"><i class="fa fa-minus fa-fw"></i></span>' +
-                '</p>' +
-                '</div>';
-        };
         Object.defineProperty(Application.prototype, "template", {
             get: function () {
                 return this._template;
@@ -132,6 +161,86 @@ var Kernel;
             },
             set: function (value) {
                 this._settings = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Application.prototype, "$scope", {
+            get: function () {
+                return this._$scope;
+            },
+            set: function (value) {
+                this._$scope = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Application.prototype, "prevX", {
+            get: function () {
+                return this._prevX;
+            },
+            set: function (value) {
+                this._prevX = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Application.prototype, "prevY", {
+            get: function () {
+                return this._prevY;
+            },
+            set: function (value) {
+                this._prevY = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Application.prototype, "isDrags", {
+            get: function () {
+                return this._isDrags;
+            },
+            set: function (value) {
+                this._isDrags = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Application.prototype, "window", {
+            get: function () {
+                return this._window;
+            },
+            set: function (value) {
+                this._window = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Application.prototype, "maximized", {
+            get: function () {
+                return this._maximized;
+            },
+            set: function (value) {
+                this._maximized = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Application.prototype, "collapsed", {
+            get: function () {
+                return this._collapsed;
+            },
+            set: function (value) {
+                this._collapsed = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Application.prototype, "active", {
+            get: function () {
+                return this._active;
+            },
+            set: function (value) {
+                this._active = value;
             },
             enumerable: true,
             configurable: true
@@ -177,8 +286,8 @@ var Kernel;
 (function (Kernel) {
     var SystemApplication = (function (_super) {
         __extends(SystemApplication, _super);
-        function SystemApplication(name, settings, processManager) {
-            _super.call(this, name, settings, processManager);
+        function SystemApplication(name, settings, processManager, windowManger) {
+            _super.call(this, name, settings, processManager, windowManger);
             this.type = 'system';
         }
         return SystemApplication;
@@ -190,8 +299,8 @@ var Kernel;
 (function (Kernel) {
     var UserApplication = (function (_super) {
         __extends(UserApplication, _super);
-        function UserApplication(name, settings, processManager) {
-            _super.call(this, name, settings, processManager);
+        function UserApplication(name, settings, processManager, windowManger) {
+            _super.call(this, name, settings, processManager, windowManger);
             this.type = 'user';
         }
         return UserApplication;
@@ -204,7 +313,7 @@ var Kernel;
     var WindowBox = (function () {
         function WindowBox(top, left, width, height) {
             if (width === void 0) { width = 640; }
-            if (height === void 0) { height = 380; }
+            if (height === void 0) { height = 480; }
             this._width = width;
             this._height = height;
             this._top = top;
@@ -253,6 +362,58 @@ var Kernel;
         return WindowBox;
     })();
     Kernel.WindowBox = WindowBox;
+})(Kernel || (Kernel = {}));
+var Kernel;
+(function (Kernel) {
+    var WindowListItem = (function () {
+        function WindowListItem(pid, template, process, applicationPackage) {
+            this.pid = pid;
+            this.template = template;
+            this.process = process;
+            this.applicationPackage = applicationPackage;
+        }
+        return WindowListItem;
+    })();
+    Kernel.WindowListItem = WindowListItem;
+})(Kernel || (Kernel = {}));
+var Kernel;
+(function (Kernel) {
+    var WindowContainer = (function () {
+        function WindowContainer() {
+            this.windowList = [];
+        }
+        WindowContainer.prototype.addWindow = function (window) {
+            this.windowList.push(window);
+        };
+        WindowContainer.prototype.removeWindow = function (pid) {
+            var index = this.findByPid(pid);
+            if (index !== null) {
+                this.windowList.splice(index, 1);
+            }
+        };
+        WindowContainer.prototype.getWindow = function (pid) {
+            var index = this.findByPid(pid);
+            if (index !== null) {
+                return this.windowList[index];
+            }
+            else {
+                return null;
+            }
+        };
+        WindowContainer.prototype.findByPid = function (pid) {
+            var wl = this.windowList;
+            var index = null;
+            for (var i = 0; i < wl.length; i++) {
+                if (wl[i].pid === pid) {
+                    index = i;
+                    break;
+                }
+            }
+            return index;
+        };
+        return WindowContainer;
+    })();
+    Kernel.WindowContainer = WindowContainer;
 })(Kernel || (Kernel = {}));
 /// <reference path='decorations.d.ts' />
 var Kernel;
@@ -460,65 +621,98 @@ var Kernel;
     })();
     Kernel.Desktop = Desktop;
 })(Kernel || (Kernel = {}));
+var Kernel;
+(function (Kernel) {
+    var WindowPanel = (function () {
+        function WindowPanel() {
+        }
+        return WindowPanel;
+    })();
+    Kernel.WindowPanel = WindowPanel;
+})(Kernel || (Kernel = {}));
 /// <reference path='services.d.ts' />
 var Kernel;
 (function (Kernel) {
     var ProcessManagerService = (function () {
-        function ProcessManagerService(rootScope) {
+        function ProcessManagerService(rootScope, window) {
+            var _this = this;
             this.rootScope = rootScope;
-            this.processList = [];
+            this.window = window;
+            this.addProcess = function (name, type, instance) {
+                var id = _this.findFreeId();
+                var listItem = new Kernel.ProcessListItem(id, instance);
+                _this._processList.push(listItem);
+                _this._processCount++;
+                instance.pid = id;
+                _this.rootScope.$broadcast('ProcessCreated', instance);
+                return id;
+            };
+            this.closeProcess = function (pid) {
+                var closed = false;
+                var processIndex = _this.findProcess(pid);
+                if (processIndex !== null) {
+                    var item = _this._processList[processIndex].process;
+                    _this._processList.splice(processIndex, 1);
+                    closed = true;
+                    _this._processCount--;
+                    _this.rootScope.$broadcast('ProcessClosed', item);
+                }
+                return closed;
+            };
+            this.findFreeId = function () {
+                var id = 0;
+                do {
+                    id++;
+                } while (_this.isIdClaimed(id) === true);
+                return id;
+            };
+            this.findProcess = function (id) {
+                var index = null;
+                for (var i = 0; i < _this._processCount; i++) {
+                    if (_this._processList[i].id === id) {
+                        index = i;
+                        break;
+                    }
+                }
+                return index;
+            };
+            this.isIdClaimed = function (id) {
+                var claimed = false;
+                for (var i = 0; i < _this._processCount; i++) {
+                    if (_this._processList[i].id === id) {
+                        claimed = true;
+                        break;
+                    }
+                }
+                return claimed;
+            };
+            this._processCount = 0;
+            this._processList = [];
         }
-        ProcessManagerService.prototype.addProcess = function (name, type, instance) {
-            var id = this.findFreeId();
-            var listItem = new Kernel.ProcessListItem(id, instance);
-            this.processList.push(listItem);
-            this.processCount++;
-            this.rootScope.$broadcast('ProcessCreated', instance);
-            return id;
-        };
-        ProcessManagerService.prototype.closeProcess = function (pid) {
-            var closed = false;
-            var processIndex = this.findProcess(pid);
-            if (processIndex !== null) {
-                this.rootScope.$broadcast('ProcessClosed', this.processList[processIndex].process);
-                this.processList.splice(processIndex, 1);
-                closed = true;
-                this.processCount--;
-            }
-            return closed;
-        };
-        ProcessManagerService.prototype.findFreeId = function () {
-            var id = 0;
-            do {
-                id++;
-            } while (this.isIdClaimed(id) === true);
-            return id;
-        };
-        ProcessManagerService.prototype.findProcess = function (id) {
-            var index = null;
-            for (var i = 0; i < this.processCount; i++) {
-                if (this.processList[i].id === id) {
-                    index = i;
-                    break;
-                }
-            }
-            return index;
-        };
-        ProcessManagerService.prototype.isIdClaimed = function (id) {
-            var claimed = false;
-            for (var i = 0; i < this.processCount; i++) {
-                if (this.processList[i].id === id) {
-                    claimed = true;
-                    break;
-                }
-            }
-            return claimed;
-        };
         ProcessManagerService.Factory = function () {
-            var processManager = function ($rootScope) { return new ProcessManagerService($rootScope); };
+            var processManager = function ($rootScope, $window) {
+                if (angular.isDefined($window.processManager) === false) {
+                    $window.processManager = new ProcessManagerService($rootScope, $window);
+                }
+                return $window.processManager;
+            };
             return processManager;
         };
-        ProcessManagerService.$inject = ['$rootScope'];
+        Object.defineProperty(ProcessManagerService.prototype, "processList", {
+            get: function () {
+                return this._processList;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ProcessManagerService.prototype, "processCount", {
+            get: function () {
+                return this._processCount;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        ProcessManagerService.$inject = ['$rootScope', '$window'];
         return ProcessManagerService;
     })();
     Kernel.ProcessManagerService = ProcessManagerService;
@@ -647,276 +841,239 @@ var Kernel;
 })(Kernel || (Kernel = {}));
 var Kernel;
 (function (Kernel) {
-    var WindowListItem = (function () {
-        function WindowListItem(pid, template, process, applicationPackage) {
-            this.pid = pid;
-            this.template = template;
-            this.process = process;
-            this.applicationPackage = applicationPackage;
-        }
-        return WindowListItem;
-    })();
     var ApplicationLauncher = (function () {
-        function ApplicationLauncher(http, compile, processManager, document, rootScope) {
+        function ApplicationLauncher(http, processManager, document, rootScope, resourceLoader, windowManager) {
             var _this = this;
             this.http = http;
-            this.compile = compile;
             this.processManager = processManager;
             this.document = document;
             this.rootScope = rootScope;
+            this.resourceLoader = resourceLoader;
+            this.windowManager = windowManager;
             this.launchApplication = function (pack) {
                 // Get app package
                 var promise = _this.http.get(pack);
                 // Handle response
                 promise.success(_this.bootstrap);
             };
-            this.loadModule = function (folder, module, files, template) {
-                var basePath = 'http://desktop.dev/applications/system/' + folder + '/';
-                yepnope.injectJs(basePath + module.file, function () {
-                    var filesToLoad = [];
-                    for (var i = 0; i < files.length; i++) {
-                        filesToLoad.push(basePath + files[i].file);
-                    }
-                    yepnope(filesToLoad, function () {
-                        angular.bootstrap(template, [module.name]);
-                    });
+            this.bootstrap = function (response) {
+                var windowBox = new Kernel.WindowBox(response.settings.top, response.settings.left, response.settings.width, response.settings.height);
+                // Create application settings
+                var appSettings = new Kernel.ApplicationWindowSettings(windowBox);
+                // Create instance of System app
+                var application = new Kernel.SystemApplication(response.module.name, appSettings, _this.processManager, _this.windowManager);
+                // Compile application template
+                var compiledTemplate = application.window = _this.compileTemplate(application);
+                // Merge arrays with application files
+                var files = response.stylesheet.concat(response.javascript);
+                // Load module files
+                var promise = _this.loadModule(response.folder, response.module, files);
+                promise.then(function () {
+                    // Add application to process manager
+                    application.run();
+                    compiledTemplate.attr('id', 'application-' + application.pid);
+                    // Bootstrap new angular module
+                    var app = angular.bootstrap(compiledTemplate, [response.module.name]);
+                    // Define application standard events
+                    _this.defineWindowEvents(app.get('$rootScope'), application);
+                    // Register window in window manager
+                    var listItem = new Kernel.WindowListItem(application.pid, compiledTemplate, application, response);
+                    _this.windowManager.addWindow(listItem);
+                    // Make application active
+                    _this.windowManager.setActive(application.pid);
+                    _this.rootScope.$broadcast('WindowCreated', listItem);
                 });
             };
-            this.compileTemplate = function (template, name) {
-                var compiled = _this.compile(angular.element(template))(_this.rootScope);
-                var appLayer = _this.document.find('div#applications-layer');
-                var appContainer = angular.element('<div style="height: 100%; overflow: auto;" ui-view="' + name + '"></div>');
-                appContainer.attr('id', name);
-                appContainer.append(compiled);
-                appLayer.append(appContainer);
-                appContainer = _this.compile(appContainer)(_this.rootScope);
+            this.loadModule = function (folder, module, files) {
+                // Extract files that need to load
+                var basePath = 'http://desktop.dev/applications/system/' + folder + '/';
+                var filesToLoad = [];
+                for (var i = 0; i < files.length; i++) {
+                    filesToLoad.push(basePath + files[i].file);
+                }
+                filesToLoad.push(basePath + module.file);
+                // Load application files
+                return _this.resourceLoader.load(filesToLoad);
+            };
+            this.compileTemplate = function (application) {
+                var appContainer = angular.element(application.template);
+                // Create new application container
+                var container = angular.element('<div></div>');
+                // Add attributes
+                container.attr('ui-view', application.name);
+                container.attr('class', application.name + '-main');
+                appContainer.append(container);
+                // Append template to div#applications-layer
+                _this.applicationLayer.append(appContainer);
                 return appContainer;
             };
+            this.defineWindowEvents = function ($rootScope, application) {
+                // Define application close event
+                $rootScope.close = application.close;
+                // Define mouse events to move application
+                $rootScope.onMouseDown = application.onMouseDown;
+                _this.document.on('mousemove', application.onMouseMove);
+                _this.document.on('mouseup', application.onMouseUp);
+                $rootScope.maximize = application.maximize;
+                $rootScope.collapse = application.collapse;
+                $rootScope.makeActive = application.makeActive;
+                application.$scope = $rootScope;
+            };
+            // *************** EVENTS ***************
             this.onApplicationClosed = function (event, data) {
+                // Find Window Process
+                var windowProcess = _this.windowManager.getWindow(data.pid);
+                if (windowProcess !== null) {
+                    // Remove window if exist
+                    windowProcess.template.remove();
+                    // Destroy application scope
+                    windowProcess.process.$scope.$destroy();
+                    // Delete window from window list
+                    _this.windowManager.removeWindow(data.pid);
+                    // Broadcast event that window destroyed
+                    _this.rootScope.$broadcast('WindowClosed', windowProcess);
+                }
             };
             // Register events
-            this.rootScope.$on('ApplicationClosed', this.onApplicationClosed);
+            this.rootScope.$on('ProcessClosed', this.onApplicationClosed);
+            this.applicationLayer = this.document.find('div#applications-layer');
         }
-        ApplicationLauncher.prototype.bootstrap = function (response) {
-            var windowBox = new Kernel.WindowBox(response.settings.top, response.settings.left, response.settings.width, response.settings.height);
-            var appSettings = new Kernel.ApplicationWindowSettings(windowBox);
-            var application = new Kernel.SystemApplication(response.module.name, appSettings, this.processManager);
-            var compiledTemplate = this.compileTemplate(application.template, application.name);
-            this.loadModule(response.folder, response.module, response.javascript, compiledTemplate);
-            // Add application to process manager
-            application.run();
-            // Add application to applications list
-            this.windowList.push(new WindowListItem(application.pid, compiledTemplate, application, response));
-        };
-        ;
         ApplicationLauncher.Factory = function () {
-            var factory = function ($http, $compile, processManagerService, $document, $rootScope) {
-                return new ApplicationLauncher($http, $compile, processManagerService, $document, $rootScope);
+            var factory = function ($http, processManagerService, $document, $rootScope, resourceLoaderService, windowManagerService) {
+                return new ApplicationLauncher($http, processManagerService, $document, $rootScope, resourceLoaderService, windowManagerService);
             };
             return factory;
         };
-        ApplicationLauncher.$inject = ['$http', '$compile', 'processManagerService', '$document', '$rootScope'];
+        ApplicationLauncher.$inject = [
+            '$http', 'processManagerService', '$document',
+            '$rootScope', 'resourceLoaderService', 'windowManagerService'
+        ];
         return ApplicationLauncher;
     })();
     Kernel.ApplicationLauncher = ApplicationLauncher;
 })(Kernel || (Kernel = {}));
-//(function (angular) {
-//    angular.module('components').directive('application', Directive);
-//
-//    Directive.$inject = ['$http', '$compile', 'ProcessManager', '$document', '$rootScope'];
-//
-//    function Directive($http, $compile, ProcessManager, $document, $rootScope) {
-//        function Link($scope, $element) {
-//            $element.remove();
-//
-//            var windowTemplate = '<div style="background-color: white; color: black; overflow: hidden;" class="no-select" ng-mousedown="selectDirective();">' +
-//                '<p style=\"background-color: lightblue; height: 23px; width: 100%; margin: 0; display: table; cursor: pointer; padding: 0 5px;\" '+
-//                'ng-mousedown=\"down($event);\">' +
-//                '<span class="menu-button" ng-click="closeProcess();"><i class="fa fa-close fa-fw"></i></span>' +
-//                '<span class="menu-button" ng-click="toggleFullscreen();"><i class="fa fa-windows fa-fw"></i></span>' +
-//                '<span class="menu-button" ng-click="collapse();"><i class="fa fa-minus fa-fw"></i></span>' +
-//                '</p>' +
-//                '<div style="height: 100%; overflow: auto;" ui-view="' + mod + '"></div>' +
-//                '</div>';
-//
-//
-//            var directive = null;
-//            var fullscreen = false;
-//            var width = 640;
-//            var height = 480;
-//            var top = 50;
-//            var left = 50;
-//
-//            $scope.dragAndDrop = {
-//                'draggable': false,
-//                'lastX': 0,
-//                'lastY': 0
-//            };
-//
-//            // Loading package...
-//            var promise = $http.get($scope.app);
-//            promise.success(function (response) {
-//                $scope.pid = ProcessManager.addProcess(response.module.name, 'system', $scope.index);
-//                if ($scope.pid !== null) {
-//                    LoadApp(response);
-//                }
-//            });
-//
-//            function LoadApp (response) {
-//                var mod = response.module.name;
-//
-//                // When package loaded need to load application files
-//                $scope.$on('ApplicationPackageLoaded', function (event, response) {
-//                    $scope.app = response;
-//                    var basePath = 'http://desktop.dev/javascripts/Components/' + response.folder + '/';
-//                    yepnope.injectJs(basePath + response.module.file, function () {
-//                        var filesToLoad = [];
-//                        angular.forEach(response.javascript, (val:any) => {
-//                            this.push(basePath + val.file);
-//                        }, filesToLoad);
-//                        yepnope(filesToLoad, function () {
-//                            $scope.$broadcast('ApplicationFilesLoaded');
-//                        });
-//                    });
-//                });
-//
-//                // When all files loaded need to bootstrap app...
-//                $scope.$on('ApplicationFilesLoaded', function () {
-//                    directive = $compile(angular.element(windowTemplate))($scope);
-//                    directive.draggable = true;
-//                    angular.element(document).find('body').append(directive);
-//                    decorateApp(directive);
-//
-//                    var appContainer = angular.element('<div style="height: 100%; overflow: auto;" ui-view="' + mod + '"></div>');
-//                    appContainer.id = mod;
-//                    directive.append(appContainer);
-//                    $compile(appContainer)($scope);
-//                    angular.bootstrap(appContainer, [mod]);
-//                    $scope.$broadcast('ApplicationBootstraped');
-//                });
-//
-//                $scope.$broadcast('ApplicationPackageLoaded', response);
-//            }
-//
-//            // Tells Process Manager that the application is going to close
-//            $scope.closeProcess = function () {
-//                ProcessManager.closeProcess($scope.pid);
-//            };
-//
-//            $scope.selectDirective = function () {
-//                if ($scope.selected === false) {
-//                    $scope.$emit('ApplicationSelected', $scope.index);
-//                }
-//            };
-//
-//            function closeApplication() {
-//                $scope.$emit('ApplicationTerminated', $scope.index);
-//                $scope.$destroy();
-//                directive.remove();
-//            }
-//
-//            $scope.collapse = function () {
-//                $scope.$emit('ApplicationCollapsed', $scope.index = true);
-//            };
-//
-//            function decorateApp($element) {
-//                $element.css('width', width + 'px');
-//                $element.css('height', height + 'px');
-//                $element.css('position', 'absolute');
-//                $element.css('top', top + 'px');
-//                $element.css('left', left + 'px');
-//                $element.css('z-index', '10');
-//                $element.css('box-sizing', 'border-box');
-//                $element.css('border', 'solid lightblue 1px');
-//                $element.css('box-shadow', '10px 10px 35px 5px black');
-//            }
-//
-//            $scope.toggleFullscreen = function () {
-//                fullscreen = !fullscreen;
-//                if (fullscreen === true) {
-//                    directive.css('width', '100%');
-//                    directive.css('height', '100%');
-//                    directive.css('top', '0');
-//                    directive.css('left', '0');
-//                } else {
-//                    directive.css('width', width + 'px');
-//                    directive.css('height', height + 'px');
-//                    directive.css('top', top + 'px');
-//                    directive.css('left', left + 'px');
-//                }
-//            };
-//
-//
-//            // Register close process listener
-//            $rootScope.$on('ProcessClosed', function (event, data) {
-//                if (data.pid === $scope.pid) {
-//                    closeApplication();
-//                }
-//            });
-//
-//            $scope.$on('ApplicationBootstraped', function () {
-//                $scope.$watch('index', function (val) {
-//                    $scope.index = val;
-//                });
-//
-//                $scope.$watch('selected', function (val) {
-//                    if (val === true) {
-//                        directive.css('z-index', 20);
-//                    } else {
-//                        directive.css('z-index', 10);
-//                    }
-//                });
-//
-//                $scope.$watch('collapsed', function (val) {
-//                    if (val === true) {
-//                        directive.css('display', 'none');
-//                    } else {
-//                        directive.css('display', 'block');
-//                    }
-//                });
-//            });
-//
-//            $scope.down = function (event) {
-//                if (event.which === 1 && fullscreen === false) {
-//                    $scope.dragAndDrop.draggable = true;
-//                    $scope.dragAndDrop.lastX = event.pageX;
-//                    $scope.dragAndDrop.lastY = event.pageY;
-//                }
-//            };
-//
-//            $document.bind('mousemove', function (event) {
-//                if (event.which === 1 && $scope.dragAndDrop.draggable === true && fullscreen === false) {
-//                    var subX = event.pageX - $scope.dragAndDrop.lastX,
-//                        subY = event.pageY - $scope.dragAndDrop.lastY;
-//
-//                    $scope.dragAndDrop.lastX = event.pageX;
-//                    $scope.dragAndDrop.lastY = event.pageY;
-//
-//                    left += subX;
-//                    top += subY;
-//
-//                    directive.css('left', left + 'px');
-//                    directive.css('top', top + 'px');
-//                }
-//            });
-//
-//            $document.bind('mouseup', function () {
-//                $scope.dragAndDrop.draggable = false;
-//            });
-//        }
-//
-//        return {
-//            'restrict': 'E',
-//            'link': Link,
-//            'scope': {
-//                'app': '=app',
-//                'index': '=index',
-//                'selected': '=selected',
-//                'collapsed': '=collapsed'
-//            }
-//        };
-//    }
-//})(angular); 
+var Kernel;
+(function (Kernel) {
+    var ResourceLoader = (function () {
+        function ResourceLoader(document, q) {
+            var _this = this;
+            this.document = document;
+            this.q = q;
+            this.load = function (files) {
+                var defer = _this.q.defer();
+                if (files.length > 0) {
+                    var file = files[files.length - 1];
+                    var exploded = file.split('.');
+                    var extension = exploded[exploded.length - 1];
+                    var callback = function () {
+                        files.pop();
+                        var promise = _this.load(files);
+                        promise.then(function () { defer.resolve(); });
+                    };
+                    if (extension === 'js') {
+                        yepnope.injectJs(file, callback);
+                    }
+                    else if (extension === 'css') {
+                        yepnope.injectCss(file, callback);
+                    }
+                }
+                else {
+                    defer.resolve();
+                }
+                return defer.promise;
+            };
+            this.unload = function (script) {
+                angular.element('script[src="' + script + '"]').remove();
+            };
+            this.scriptsContainer = this.document.find('div#application-scripts');
+        }
+        ResourceLoader.Factory = function () {
+            var factory = function ($document, $q) { return new ResourceLoader($document, $q); };
+            return factory;
+        };
+        ResourceLoader.$inject = ['$document', '$q'];
+        return ResourceLoader;
+    })();
+    Kernel.ResourceLoader = ResourceLoader;
+})(Kernel || (Kernel = {}));
+var Kernel;
+(function (Kernel) {
+    var WindowManager = (function (_super) {
+        __extends(WindowManager, _super);
+        function WindowManager(document) {
+            _super.call(this);
+            this.document = document;
+        }
+        WindowManager.prototype.collapseWindow = function (pid) {
+            var window = this.getWindow(pid);
+            if (window !== null) {
+                var wl = this.windowList;
+                for (var i = 0; i < wl.length; i++) {
+                    if (wl[i].pid === pid) {
+                        if (wl[i].process.collapsed === true) {
+                            // Check if window is maximized
+                            var left = (wl[i].process.maximized === true)
+                                ? 0 : wl[i].process.settings.windowBox.left;
+                            wl[i].template.animate({ 'left': left + 'px' }, 550);
+                            this.setActive(wl[i].pid);
+                        }
+                        else {
+                            var left = (wl[i].template.width() < 5000) ? wl[i].template.width() + 300 : 5000;
+                            wl[i].template.animate({ 'left': -left + 'px' }, 550);
+                        }
+                        wl[i].process.collapsed = !wl[i].process.collapsed;
+                        break;
+                    }
+                }
+            }
+        };
+        WindowManager.prototype.maximizeWindow = function (pid) {
+            var window = this.getWindow(pid);
+            if (window !== null) {
+                if (window.process.maximized === true) {
+                    window.process.maximized = false;
+                    window.template.css('height', window.process.settings.windowBox.height + 'px');
+                    window.template.css('width', window.process.settings.windowBox.width + 'px');
+                    window.template.css('top', window.process.settings.windowBox.top + 'px');
+                    window.template.css('left', window.process.settings.windowBox.left + 'px');
+                    window.template.removeClass('maximized');
+                }
+                else {
+                    window.process.maximized = true;
+                    window.template.css('height', this.document.innerHeight() + 'px');
+                    window.template.css('width', this.document.innerWidth() + 'px');
+                    window.template.css('top', '0');
+                    window.template.css('left', '0');
+                    window.template.addClass('maximized');
+                }
+            }
+        };
+        WindowManager.prototype.setActive = function (pid) {
+            var window = this.getWindow(pid);
+            if (window !== null) {
+                angular.forEach(this.windowList, function (item) {
+                    if (item.process.active === true && item.pid !== pid) {
+                        item.process.active = false;
+                        item.template.css('z-index', '1001');
+                        item.template.css('opacity', '0.95');
+                    }
+                    if (item.pid === pid) {
+                        item.process.active = true;
+                        item.template.css('z-index', '1010');
+                        item.template.css('opacity', '1.0');
+                    }
+                });
+            }
+        };
+        WindowManager.Factory = function () {
+            var factory = function ($document) { return new WindowManager($document); };
+            return factory;
+        };
+        WindowManager.$inject = ['$document'];
+        return WindowManager;
+    })(Kernel.WindowContainer);
+    Kernel.WindowManager = WindowManager;
+})(Kernel || (Kernel = {}));
 /// <reference path='controllers.d.ts' />
 var Kernel;
 (function (Kernel) {
@@ -961,7 +1118,7 @@ var Kernel;
     })();
     Kernel.DesktopDirective = DesktopDirective;
     var DesktopDirectiveController = (function () {
-        function DesktopDirectiveController(scope, window, document, fs, rootScope, http, desktopService, applicationLauncher, processManager) {
+        function DesktopDirectiveController(scope, window, document, fs, rootScope, http, desktopService, applicationLauncher, timeout) {
             var _this = this;
             this.scope = scope;
             this.window = window;
@@ -971,7 +1128,7 @@ var Kernel;
             this.http = http;
             this.desktopService = desktopService;
             this.applicationLauncher = applicationLauncher;
-            this.processManager = processManager;
+            this.timeout = timeout;
             this.launch = function (pack) {
                 _this.applicationLauncher.launchApplication(pack);
             };
@@ -982,7 +1139,7 @@ var Kernel;
             this.DesktopGridStateChanged = function (event, data) {
                 _this.desktop.saveGrid(_this.scope.desktopId, _this.scope.desktopGrid);
             };
-            this.KeyDown = function (event) {
+            this.onKeyDown = function (event) {
                 if (event.ctrlKey && event.shiftKey) {
                     switch (event.which) {
                         case 37:
@@ -993,12 +1150,12 @@ var Kernel;
                             break;
                     }
                 }
-                _this.scope.$apply();
             };
-            this.Resize = function (event) {
-                _this.scope.background.settings.width = _this.window.innerWidth;
-                _this.scope.background.settings.height = _this.window.innerHeight;
-                _this.scope.$apply();
+            this.onResize = function (event) {
+                _this.timeout(function () {
+                    _this.scope.background.settings.width = _this.window.innerWidth;
+                    _this.scope.background.settings.height = _this.window.innerHeight;
+                });
             };
             var promise = this.desktopService.getDesktop(this.scope.desktop.desktopId);
             promise.then(function (response) {
@@ -1007,45 +1164,24 @@ var Kernel;
                     _this.scope.background = _this.createBackground(response);
                     scope.background.settings.width = _this.window.innerWidth;
                     scope.background.settings.height = _this.window.innerHeight;
-                    scope.applications = [];
-                    scope.apps = [];
-                    scope.package = '/javascripts/Components/ProcessManager/process-manager.ae';
+                    scope.package = '/applications/system/ProcessManager/process-manager.ae';
                     scope.desktopGrid = _this.desktop.initGrid();
                 }
             });
             // Register events
             this.rootScope.$on('DesktopImageChanged', this.DesktopImageChanged);
             this.scope.$on('DesktopGridStateChanged', this.DesktopGridStateChanged);
-            angular.element(this.window).bind('keydown', this.KeyDown);
-            angular.element(this.window).bind('resize', this.Resize);
+            var $window = angular.element(this.window);
+            $window.on('keydown', this.onKeyDown);
+            $window.on('resize', this.onResize);
         }
         DesktopDirectiveController.prototype.createBackground = function (response) {
-            var _this = this;
-            return {
-                'settings': this.desktop.settings.getCss(),
-                'contextMenu': [
-                    ['Create File', function () {
-                            var promise = _this.fs.mkFile({ 'name': prompt('Input file name') });
-                            promise.then(function (response) {
-                                alert(response.name);
-                            });
-                        }],
-                    ['Create Directory', function () {
-                            var promise = _this.fs.mkDir({ 'name': prompt('Input directory name') });
-                            promise.then(function (response) {
-                                alert(response.name);
-                            });
-                        }],
-                    ['Change Settings', function () {
-                            alert('Vasya lox');
-                        }]
-                ]
-            };
+            return { 'settings': this.desktop.settings.getCss() };
         };
         DesktopDirectiveController.$inject = [
             '$scope', '$window', '$document', 'filesystemService',
             '$rootScope', '$http', 'desktopService',
-            'applicationLauncherService'
+            'applicationLauncherService', '$timeout'
         ];
         return DesktopDirectiveController;
     })();
@@ -1059,11 +1195,8 @@ var Kernel;
             this.window = window;
             this.document = document;
             this.templateUrl = '/views/desktop.panel.html';
-            this.scope = {
-                'settings': '=settings',
-                'apps': '=apps'
-            };
-            this.bindToController = true;
+            this.scope = true;
+            this.bindToController = { 'settings': '=settings' };
             this.restrict = "E";
             this.controller = 'DesktopPanelDirectiveController';
             this.controllerAs = 'panel';
@@ -1079,37 +1212,53 @@ var Kernel;
                         'left': '0'
                     };
                 }
-                var panelMenu = $element.find('div.desktop-panel-menu');
+                $scope.menuPanel = $element.find('div.desktop-panel-menu');
                 var panelBottom = parseInt($scope.settings.height.replace('px', '')) + 3;
-                panelMenu.css('bottom', panelBottom + 'px');
+                $scope.menuPanel.css('bottom', panelBottom + 'px');
                 $scope.menuVisible = false;
                 var resizePanelMenu = function () {
-                    panelMenu.css('height', (window.innerHeight / 2) + 'px');
-                    panelMenu.css('width', (window.innerWidth * 0.35) + 'px');
+                    $scope.menuPanel.css('height', (window.innerHeight / 2) + 'px');
+                    $scope.menuPanel.css('width', (window.innerWidth * 0.35) + 'px');
                 };
-                angular.element(window).on('resize', function (event) {
-                    resizePanelMenu();
-                });
+                var $window = angular.element(_this.window);
+                $window.on('resize', resizePanelMenu);
                 resizePanelMenu();
             };
         }
         DesktopPanelDirective.Factory = function () {
-            var directive = function ($window, $document) { return new DesktopPanelDirective($window, $document); };
+            var directive = function ($window, $document) {
+                return new DesktopPanelDirective($window, $document);
+            };
             return directive;
         };
         DesktopPanelDirective.$inject = ['$window', '$document'];
         return DesktopPanelDirective;
     })();
     Kernel.DesktopPanelDirective = DesktopPanelDirective;
-    var DesktopPanelDirectiveController = (function () {
-        function DesktopPanelDirectiveController() {
+    var DesktopPanelDirectiveController = (function (_super) {
+        __extends(DesktopPanelDirectiveController, _super);
+        function DesktopPanelDirectiveController(rootScope, windowManager, scope, timeout) {
+            var _this = this;
+            _super.call(this);
+            this.rootScope = rootScope;
+            this.windowManager = windowManager;
+            this.scope = scope;
+            this.timeout = timeout;
+            this.onWindowCreated = function (event, data) {
+                _this.timeout(function () { _this.addWindow(_this.windowManager.getWindow(data.pid)); });
+            };
+            this.onWindowClosed = function (event, data) {
+                _this.timeout(function () { _this.removeWindow(data.pid); });
+            };
+            this.rootScope.$on('WindowCreated', this.onWindowCreated);
+            this.rootScope.$on('WindowClosed', this.onWindowClosed);
         }
-        DesktopPanelDirectiveController.Factory = function () {
-            var controller = function () { return new DesktopPanelDirectiveController(); };
+        DesktopPanelDirectiveController.prototype.toggleWindow = function (pid) {
+            this.windowManager.collapseWindow(pid);
         };
-        DesktopPanelDirectiveController.$inject = ['$rootScope', '$window'];
+        DesktopPanelDirectiveController.$inject = ['$rootScope', 'windowManagerService', '$scope', '$timeout'];
         return DesktopPanelDirectiveController;
-    })();
+    })(Kernel.WindowContainer);
     Kernel.DesktopPanelDirectiveController = DesktopPanelDirectiveController;
 })(Kernel || (Kernel = {}));
 var Kernel;
@@ -1150,20 +1299,32 @@ var Kernel;
         'ngAnimate',
         'angular-sortable-view',
         'pascalprecht.translate',
-        'ui.bootstrap.contextMenu',
     ])
-        .factory('filesystemService', Kernel.FilesystemService.Factory())
-        .factory('spinnerService', Kernel.SpinnerService.Factory())
-        .factory('desktopService', Kernel.DesktopService.Factory())
+        .factory('$globalScope', globalScope)
+        .factory('resourceLoaderService', Kernel.ResourceLoader.Factory())
         .factory('processManagerService', Kernel.ProcessManagerService.Factory())
+        .factory('windowManagerService', Kernel.WindowManager.Factory())
+        .factory('filesystemService', Kernel.FilesystemService.Factory())
         .factory('applicationLauncherService', Kernel.ApplicationLauncher.Factory())
+        .factory('desktopService', Kernel.DesktopService.Factory())
+        .factory('spinnerService', Kernel.SpinnerService.Factory())
         .controller('applicationController', Kernel.ApplicationController)
         .controller('DesktopDirectiveController', Kernel.DesktopDirectiveController)
         .controller('DesktopPanelDirectiveController', Kernel.DesktopPanelDirectiveController)
         .controller('DesktopGridDirectiveController', Kernel.DesktopGridDirectiveController)
         .directive('desktop', Kernel.DesktopDirective.Factory())
         .directive('desktopGrid', Kernel.DesktopGridDirective.Factory())
-        .directive('desktopPanel', Kernel.DesktopPanelDirective.Factory());
+        .directive('desktopPanel', Kernel.DesktopPanelDirective.Factory())
+        .run(run);
+    globalScope.$inject = ['$window', '$rootScope'];
+    function globalScope($window, $rootScope) {
+        if (angular.isDefined($window.superScope) === false) {
+            $window.superScope = $rootScope;
+        }
+        return $window.superScope;
+    }
+    run.$inject = ['$globalScope'];
+    function run($globalScope) { }
 })(Kernel || (Kernel = {}));
 /// <reference path='typings/tsd.d.ts' />
 /// <reference path='Declarations/declarations.d.ts' />

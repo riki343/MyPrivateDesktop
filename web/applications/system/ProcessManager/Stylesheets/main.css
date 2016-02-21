@@ -1,0 +1,10 @@
+.process-manager-main {}
+
+.process-manager-list-item {
+    cursor: pointer;
+}
+
+.process-manager-list-item.selected {
+    background-color: lightblue;
+    opacity: 0.7;
+}

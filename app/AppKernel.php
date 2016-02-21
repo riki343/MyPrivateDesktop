@@ -23,7 +23,6 @@ class AppKernel extends Kernel
             new Knp\Bundle\PaginatorBundle\KnpPaginatorBundle(),
             new FOS\UserBundle\FOSUserBundle(),
             new JDare\ClankBundle\JDareClankBundle(),
-            new riki34\SymfonyAngularEntitiesBundle\riki34SymfonyAngularEntitiesBundle(),
 
             new riki34\BackendBundle\riki34BackendBundle(),
             new riki34\FrontendBundle\riki34FrontendBundle(),

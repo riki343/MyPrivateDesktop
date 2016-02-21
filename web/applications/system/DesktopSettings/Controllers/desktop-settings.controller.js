@@ -2,14 +2,12 @@
     angular.module('desktop-settings').controller('desktopSettingsController', Controller);
 
     Controller.$inject = [
-        '$scope', 'desktopSettings'
+        '$scope', 'processManagerService'
     ];
 
-    function Controller($scope, settings) {
-        var fileinput = angular.element('input#file');
-        fileinput.bind('change', function (event) {
-            var file = (event.srcElement || event.target).files[0];
-            settings.background.setImage(file.src);
-        });
+    function Controller($scope, processManager) {
+        var self = this;
+        this.count = processManager.processCount;
+        this.list  = processManager.processList;
     }
 })(angular);

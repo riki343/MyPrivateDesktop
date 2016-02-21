@@ -2,15 +2,13 @@ module Kernel {
     interface iDesktopPanelDirectiveScope extends ng.IScope {
         menuVisible: boolean;
         settings: any;
+        menuPanel: any;
     }
 
     export class DesktopPanelDirective implements ng.IDirective {
         public templateUrl = '/views/desktop.panel.html';
-        public scope = {
-            'settings': '=settings',
-            'apps': '=apps'
-        };
-        public bindToController = true;
+        public scope = true;
+        public bindToController = { 'settings': '=settings' };
         public restrict = "E";
         public controller = 'DesktopPanelDirectiveController';
         public controllerAs = 'panel';
@@ -32,37 +30,56 @@ module Kernel {
                 };
             }
 
-
-            let panelMenu = $element.find('div.desktop-panel-menu');
+            $scope.menuPanel = $element.find('div.desktop-panel-menu');
             let panelBottom = parseInt($scope.settings.height.replace('px', '')) + 3;
-            panelMenu.css('bottom', panelBottom + 'px');
+            $scope.menuPanel.css('bottom', panelBottom + 'px');
 
             $scope.menuVisible = false;
 
             let resizePanelMenu = () => {
-                panelMenu.css('height', (window.innerHeight / 2) + 'px');
-                panelMenu.css('width', (window.innerWidth * 0.35) + 'px');
+                $scope.menuPanel.css('height', (window.innerHeight / 2) + 'px');
+                $scope.menuPanel.css('width', (window.innerWidth * 0.35) + 'px');
             };
 
-            angular.element(window).on('resize', function (event) {
-                resizePanelMenu();
-            });
+            let $window = angular.element(this.window);
+            $window.on('resize', resizePanelMenu);
 
             resizePanelMenu();
         };
 
         public static Factory() {
-            const directive = ($window: ng.IWindowService, $document: ng.IDocumentService) => new DesktopPanelDirective($window, $document);
+            const directive = (
+                $window: ng.IWindowService, $document: ng.IDocumentService
+            ) => new DesktopPanelDirective($window, $document);
 
             return directive;
         }
     }
 
-    export class DesktopPanelDirectiveController {
-        public static $inject = ['$rootScope', '$window'];
+    export class DesktopPanelDirectiveController extends WindowContainer{
+        public static $inject = ['$rootScope', 'windowManagerService', '$scope', '$timeout'];
 
-        public static Factory() {
-            const controller = () => new DesktopPanelDirectiveController();
+        constructor(
+            private rootScope: ng.IRootScopeService,
+            private windowManager: WindowManager,
+            private scope: any,
+            private timeout: ng.ITimeoutService
+        ) {
+            super();
+            this.rootScope.$on('WindowCreated', this.onWindowCreated);
+            this.rootScope.$on('WindowClosed', this.onWindowClosed);
         }
+
+        public toggleWindow(pid: number) {
+            this.windowManager.collapseWindow(pid);
+        }
+
+        private onWindowCreated = (event, data: any) => {
+            this.timeout(() => { this.addWindow(this.windowManager.getWindow(data.pid)); });
+        };
+
+        private onWindowClosed = (event, data: any) => {
+            this.timeout(() => { this.removeWindow(data.pid); });
+        };
     }
 }

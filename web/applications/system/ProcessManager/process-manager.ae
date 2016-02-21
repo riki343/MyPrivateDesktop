@@ -12,10 +12,17 @@
       "file": "Controllers/process-manager.controller.js"
     }
   ],
+  "stylesheet": [
+    {
+      "type": "stylesheet",
+      "name": "main.css",
+      "file": "Stylesheets/main.css"
+    }
+  ],
   "resources": [],
   "settings": {
-    "width": 300,
-    "height": 200,
+    "width": 640,
+    "height": 480,
     "top": 50,
     "left": 50
   },

@@ -4,3 +4,5 @@
 /// <reference path='FilesystemService.ts' />
 /// <reference path='DesktopService.ts' />
 /// <reference path='ApplicationLauncher.ts' />
+/// <reference path='ResourceLoader.ts' />
+/// <reference path='WindowManager.ts' />

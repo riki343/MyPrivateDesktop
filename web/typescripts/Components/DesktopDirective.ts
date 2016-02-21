@@ -17,9 +17,7 @@ module Kernel {
 
     interface iDesktopDirectiveScope extends ng.IScope {
         background: any;
-        applications: any;
-        apps: any;
-        package: any;
+        package: string;
         desktopGrid: any;
         desktopId: any;
         desktop: any;
@@ -31,7 +29,7 @@ module Kernel {
         public static $inject = [
             '$scope', '$window', '$document', 'filesystemService',
             '$rootScope', '$http', 'desktopService',
-            'applicationLauncherService'
+            'applicationLauncherService', '$timeout'
         ];
 
         constructor(
@@ -43,7 +41,7 @@ module Kernel {
             private http: ng.IHttpService,
             private desktopService: DesktopService,
             private applicationLauncher: ApplicationLauncher,
-            private processManager: IProcessManager
+            private timeout: ng.ITimeoutService
         ) {
             let promise = this.desktopService.getDesktop(this.scope.desktop.desktopId);
             promise.then((response) => {
@@ -52,9 +50,7 @@ module Kernel {
                     this.scope.background = this.createBackground(response);
                     scope.background.settings.width = this.window.innerWidth;
                     scope.background.settings.height = this.window.innerHeight;
-                    scope.applications = [];
-                    scope.apps = [];
-                    scope.package  = '/javascripts/Components/ProcessManager/process-manager.ae';
+                    scope.package  = '/applications/system/ProcessManager/process-manager.ae';
                     scope.desktopGrid = this.desktop.initGrid();
                     // TODO: implement function initGrid(), rewrite old code from /javascripts/Components/Old/desktop.directive.js
                     //this.scope.grid = new DesktopGrid.initGrid();
@@ -64,8 +60,9 @@ module Kernel {
             // Register events
             this.rootScope.$on('DesktopImageChanged', this.DesktopImageChanged);
             this.scope.$on('DesktopGridStateChanged', this.DesktopGridStateChanged);
-            angular.element(this.window).bind('keydown', this.KeyDown);
-            angular.element(this.window).bind('resize', this.Resize);
+            let $window = angular.element(this.window);
+            $window.on('keydown', this.onKeyDown);
+            $window.on('resize', this.onResize);
         }
 
         public launch = (pack: string) => {
@@ -73,26 +70,7 @@ module Kernel {
         };
 
         public createBackground (response) {
-            return {
-                'settings': this.desktop.settings.getCss(),
-                'contextMenu': [
-                    [ 'Create File', () => {
-                        let promise = this.fs.mkFile({ 'name': prompt('Input file name') });
-                        promise.then(function (response:any) {
-                            alert(response.name);
-                        });
-                    }],
-                    [ 'Create Directory', () => {
-                        var promise = this.fs.mkDir({ 'name': prompt('Input directory name') });
-                        promise.then(function (response:any) {
-                            alert(response.name);
-                        });
-                    }],
-                    [ 'Change Settings', () => {
-                        alert('Vasya lox');
-                    }]
-                ]
-            };
+            return { 'settings': this.desktop.settings.getCss() };
         }
 
         // EVENTS
@@ -104,20 +82,20 @@ module Kernel {
             this.desktop.saveGrid(this.scope.desktopId, this.scope.desktopGrid);
         };
 
-        public KeyDown = (event) => {
+        public onKeyDown = (event) => {
             if (event.ctrlKey && event.shiftKey) {
                 switch (event.which) {
                     case 37: alert('suck'); break;
                     case 39: alert('suck'); break;
                 }
             }
-            this.scope.$apply();
         };
 
-        public Resize = (event) => {
-            this.scope.background.settings.width  = this.window.innerWidth;
-            this.scope.background.settings.height = this.window.innerHeight;
-            this.scope.$apply();
+        public onResize = (event) => {
+            this.timeout(() => {
+                this.scope.background.settings.width  = this.window.innerWidth;
+                this.scope.background.settings.height = this.window.innerHeight;
+            });
         };
 
     }

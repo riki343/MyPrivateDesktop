@@ -17,6 +17,7 @@ module Kernel {
         systemDependencies: Array<string>;
         dependencies: Array<string>;
         javascript: Array<IModuleFile>;
+        stylesheet: Array<IModuleFile>;
         resources: Array<any>;
         settings: {
             top: number;

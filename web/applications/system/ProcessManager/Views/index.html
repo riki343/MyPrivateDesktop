@@ -1,4 +1,25 @@
 <div ng-controller="processManagerController as process">
-    ProcessManager <br>
-    <input type="file" id="file" />
+    Process count: {{ process.count }}
+    <div class="table-responsive">
+        <table class="table table-stripped table-bordered">
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>User</th>
+                <th>Process ID</th>
+            </tr>
+            <tr ng-repeat="item in process.list"
+                ng-click="process.selected = item;"
+                ng-class="{'selected': process.selected === item}"
+                class="process-manager-list-item"
+            >
+                <td>{{ $index + 1 }}</td>
+                <td>{{ item.process.name }}</td>
+                <td>{{ item.process.type }}</td>
+                <td>{{ item.process.pid }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <button type="button" ng-click="process.closeProcess(process.selected.process.pid);">Close process</button>
 </div>

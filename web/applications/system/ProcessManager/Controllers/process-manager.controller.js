@@ -2,14 +2,32 @@
     angular.module('process-manager').controller('processManagerController', Controller);
 
     Controller.$inject = [
-        '$scope', 'desktopSettings'
+        'processManagerService', '$scope', '$globalScope', '$timeout', '$rootScope'
     ];
 
-    function Controller($scope, settings) {
-        var fileinput = angular.element('input#file');
-        fileinput.bind('change', function (event) {
-            var file = (event.srcElement || event.target).files[0];
-            settings.background.setImage(file.src);
-        });
+    function Controller(processManager, $scope, $globalScope, $timeout, $rootScope) {
+        this.count = processManager.processCount;
+        this.list  = processManager.processList;
+        this.selected = null;
+
+        $globalScope.$on('ProcessCreated', function () {
+            $timeout(function () {
+                $scope.process.list = processManager.processList;
+                $scope.process.count = processManager.processCount;
+            });
+        }).bind(this);
+
+        $globalScope.$on('ProcessClosed', function () {
+            $timeout(function () {
+                $scope.process.list = processManager.processList;
+                $scope.process.count = processManager.processCount;
+            });
+        }).bind(this);
+
+        this.closeProcess = function (pid) {
+            processManager.closeProcess(pid);
+        };
+
+        $rootScope.$on('$destroy', function() { $scope.$destroy() });
     }
 })(angular);

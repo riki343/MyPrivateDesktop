@@ -10,7 +10,7 @@ module Kernel {
 
         constructor (
             top:number, left:number,
-            width:number = 640, height:number = 380
+            width:number = 640, height:number = 480
         ) {
             this._width = width;
             this._height = height;

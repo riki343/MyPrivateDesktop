@@ -20,8 +20,8 @@ assetic:
                 - 'vendor/Angular/angular-touch.min.js'
                 - 'vendor/angular-translate/angular-translate.js'
                 - 'vendor/angular-translate/angular-translate-loader-static-files.js'
-                - 'vendor/ui.bootstrap.context-menu/context-menu.js'
                 - 'vendor/angular-sortable-view/angular-sortable-view.min.js'
+                - 'bower_components/ngstorage/ngStorage.min.js'
         modules:
             inputs:
                 - 'compiled/Kernel.js'

@@ -4,7 +4,6 @@ module Kernel {
     export class ProcessListItem {
         private _id: number;
         private _process: Process;
-        private _window;
 
         constructor(id: number, process: Process) {
             this._id = id;
@@ -26,14 +25,6 @@ module Kernel {
 
         set process(value:Process) {
             this._process = value;
-        }
-
-        get window() {
-            return this._window;
-        }
-
-        set window(value) {
-            this._window = value;
         }
     }
 }

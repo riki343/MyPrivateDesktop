@@ -10,7 +10,7 @@
             .state('home', {
                 'url': '/process-manager/home',
                 'views': {
-                    'process-manager': { 'templateUrl': '/javascripts/Components/ProcessManager/Views/index.html' }
+                    'process-manager': { 'templateUrl': 'applications/system/ProcessManager/Views/index.html' }
                 }
             })
         ;
