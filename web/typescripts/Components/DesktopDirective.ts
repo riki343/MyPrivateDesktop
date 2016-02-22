@@ -4,8 +4,8 @@ module Kernel {
     export class DesktopDirective implements ng.IDirective {
         public restrict = 'E';
         public templateUrl = '/views/desktop.html';
-        public bindToController = true;
-        public scope = {'desktopId': '@'};
+        public bindToController = {'desktopId': '@'};
+        public scope = true;
         public controller = 'DesktopDirectiveController';
         public controllerAs = 'desktop';
 
@@ -18,7 +18,6 @@ module Kernel {
     interface iDesktopDirectiveScope extends ng.IScope {
         background: any;
         package: string;
-        desktopGrid: any;
         desktopId: any;
         desktop: any;
         launch: Function;
@@ -51,9 +50,6 @@ module Kernel {
                     scope.background.settings.width = this.window.innerWidth;
                     scope.background.settings.height = this.window.innerHeight;
                     scope.package  = '/applications/system/ProcessManager/process-manager.ae';
-                    scope.desktopGrid = this.desktop.initGrid();
-                    // TODO: implement function initGrid(), rewrite old code from /javascripts/Components/Old/desktop.directive.js
-                    //this.scope.grid = new DesktopGrid.initGrid();
                 }
             });
 
@@ -79,7 +75,7 @@ module Kernel {
         };
 
         public DesktopGridStateChanged = (event, data) => {
-            this.desktop.saveGrid(this.scope.desktopId, this.scope.desktopGrid);
+            this.desktop.saveGrid(this.scope.desktopId, this.desktop.grid);
         };
 
         public onKeyDown = (event) => {

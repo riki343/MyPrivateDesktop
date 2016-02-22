@@ -116,24 +116,17 @@ body {
 
 /* Desktop cell */
 .desktop-cell {
-    float: left;
+    display: inline-block;
     margin: 0;
     padding: 3px;
     box-sizing: border-box;
-    border: solid transparent 1px;
-    overflow: hidden;
+    border: solid black 1px;
+    /*overflow: hidden;*/
     text-overflow: ellipsis;
     background-color: transparent;
     z-index: 5;
 }
 
-.desktop-cell:focus {
-    background-color: rgba(173, 216, 230, 0.71);
-}
-
-.desktop-cell:focus, .desktop-cell:hover {
-    overflow: visible;
-}
 
 
 /* Animations */

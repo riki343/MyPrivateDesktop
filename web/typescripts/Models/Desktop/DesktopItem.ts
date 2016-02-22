@@ -1,11 +1,13 @@
 module Kernel {
     export class DesktopItem {
-        private _id;
-        private _desktopId;
-        private _row;
-        private _col;
-        private _type;
-        private _item;
+        private _id: number;
+        private _desktopId: number;
+        private _row: number;
+        private _col: number;
+        private _type: any;
+        private _element: any;
+        private _width: number;
+        private _height: number;
 
         constructor(data?: any) {
             if (angular.isDefined(data)) {
@@ -14,8 +16,11 @@ module Kernel {
                 this._row = data.row;
                 this._col = data.col;
                 this._type = data.type;
-                this._item = data.item;
+                this.element = data.element;
             }
+
+            this.width = 50;
+            this.height = 40;
         }
 
         get id() {
@@ -38,8 +43,40 @@ module Kernel {
             return this._type;
         }
 
-        get item() {
-            return this._item;
+        set row(value) {
+            this._row = value;
+        }
+
+        set col(value) {
+            this._col = value;
+        }
+
+        set type(value) {
+            this._type = value;
+        }
+
+        get width() {
+            return this._width;
+        }
+
+        set width(value) {
+            this._width = value;
+        }
+
+        get height() {
+            return this._height;
+        }
+
+        set height(value) {
+            this._height = value;
+        }
+
+        get element():any {
+            return this._element;
+        }
+
+        set element(value:any) {
+            this._element = value;
         }
     }
 }

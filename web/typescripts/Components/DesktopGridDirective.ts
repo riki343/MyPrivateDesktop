@@ -2,10 +2,10 @@ module Kernel {
     export class DesktopGridDirective implements ng.IDirective {
         public templateUrl = '/views/desktop.grid.directive.html';
         public restrict = 'E';
-        public bindToController = true;
-        public scope = {'grid': '=grid'};
+        public bindToController = {'grid': '=grid'};
+        public scope = true;
         public controller = 'DesktopGridDirectiveController';
-        public controllerAs = 'grid';
+        public controllerAs = 'controller';
 
         public static Factory(): ng.IDirectiveFactory {
             const factory = () => new DesktopGridDirective();

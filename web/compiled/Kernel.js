@@ -512,8 +512,10 @@ var Kernel;
                 this._row = data.row;
                 this._col = data.col;
                 this._type = data.type;
-                this._item = data.item;
+                this.element = data.element;
             }
+            this.width = 50;
+            this.height = 40;
         }
         Object.defineProperty(DesktopItem.prototype, "id", {
             get: function () {
@@ -533,12 +535,18 @@ var Kernel;
             get: function () {
                 return this._row;
             },
+            set: function (value) {
+                this._row = value;
+            },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(DesktopItem.prototype, "col", {
             get: function () {
                 return this._col;
+            },
+            set: function (value) {
+                this._col = value;
             },
             enumerable: true,
             configurable: true
@@ -547,12 +555,38 @@ var Kernel;
             get: function () {
                 return this._type;
             },
+            set: function (value) {
+                this._type = value;
+            },
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(DesktopItem.prototype, "item", {
+        Object.defineProperty(DesktopItem.prototype, "width", {
             get: function () {
-                return this._item;
+                return this._width;
+            },
+            set: function (value) {
+                this._width = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DesktopItem.prototype, "height", {
+            get: function () {
+                return this._height;
+            },
+            set: function (value) {
+                this._height = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DesktopItem.prototype, "element", {
+            get: function () {
+                return this._element;
+            },
+            set: function (value) {
+                this._element = value;
             },
             enumerable: true,
             configurable: true
@@ -564,20 +598,87 @@ var Kernel;
 /// <reference path='../models.d.ts' />
 var Kernel;
 (function (Kernel) {
+    var DesktopGrid = (function () {
+        function DesktopGrid(height, width, data) {
+            if (angular.isDefined(data) === true) {
+            }
+            else {
+                this.rows = [];
+                this.rowsCount = 15;
+                this.colsCount = 26;
+                for (var i = 0; i < this.rowsCount; i++) {
+                    var array = [];
+                    for (var j = 0; j < this.colsCount; j++) {
+                        var item = new Kernel.DesktopItem();
+                        item.row = i;
+                        item.col = j;
+                        array.push(item);
+                    }
+                    this.rows.push(array);
+                }
+            }
+        }
+        Object.defineProperty(DesktopGrid.prototype, "rowsCount", {
+            get: function () {
+                return this._rowsCount;
+            },
+            set: function (value) {
+                this._rowsCount = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DesktopGrid.prototype, "colsCount", {
+            get: function () {
+                return this._colsCount;
+            },
+            set: function (value) {
+                this._colsCount = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DesktopGrid.prototype, "rows", {
+            get: function () {
+                return this._rows;
+            },
+            set: function (value) {
+                this._rows = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return DesktopGrid;
+    })();
+    Kernel.DesktopGrid = DesktopGrid;
+})(Kernel || (Kernel = {}));
+/// <reference path='../models.d.ts' />
+var Kernel;
+(function (Kernel) {
     var Desktop = (function () {
         function Desktop(width, height, data) {
             this.width = width;
             this.height = height;
             this._id = data.id;
             this._userId = data.userId;
-            this._grid = [];
-            for (var i = 0; i < data.grid.length; i++) {
-                this._grid.push(new Kernel.DesktopItem(data.grid[i]));
-            }
             this._settings = new Kernel.DesktopSettings(data.settings);
             this._created = data.created;
             this._updated = data.updated;
+            this.grid = new Kernel.DesktopGrid(height, width /*, data.TODO */);
         }
+        Object.defineProperty(Desktop.prototype, "grid", {
+            get: function () {
+                return this._grid;
+            },
+            set: function (value) {
+                this._grid = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Desktop.prototype.initGrid = function (height, width) {
+            this._grid = new Kernel.DesktopGrid(height, width);
+        };
         Object.defineProperty(Desktop.prototype, "id", {
             get: function () {
                 return this._id;
@@ -588,13 +689,6 @@ var Kernel;
         Object.defineProperty(Desktop.prototype, "userId", {
             get: function () {
                 return this._userId;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(Desktop.prototype, "grid", {
-            get: function () {
-                return this._grid;
             },
             enumerable: true,
             configurable: true
@@ -620,19 +714,6 @@ var Kernel;
             enumerable: true,
             configurable: true
         });
-        Desktop.prototype.initGrid = function () {
-            var x = this.width / 30;
-            var y = this.height / 20;
-            var cells = [];
-            for (var i = 0; i < 600; i++) {
-                cells.push(new Kernel.DesktopItem());
-            }
-            return {
-                'cellWidth': x,
-                'cellHeight': y,
-                'cells': cells
-            };
-        };
         return Desktop;
     })();
     Kernel.Desktop = Desktop;
@@ -1141,8 +1222,8 @@ var Kernel;
         function DesktopDirective() {
             this.restrict = 'E';
             this.templateUrl = '/views/desktop.html';
-            this.bindToController = true;
-            this.scope = { 'desktopId': '@' };
+            this.bindToController = { 'desktopId': '@' };
+            this.scope = true;
             this.controller = 'DesktopDirectiveController';
             this.controllerAs = 'desktop';
         }
@@ -1173,7 +1254,7 @@ var Kernel;
                 _this.scope.background.settings['background-image'] = data;
             };
             this.DesktopGridStateChanged = function (event, data) {
-                _this.desktop.saveGrid(_this.scope.desktopId, _this.scope.desktopGrid);
+                _this.desktop.saveGrid(_this.scope.desktopId, _this.desktop.grid);
             };
             this.onKeyDown = function (event) {
                 if (event.ctrlKey && event.shiftKey) {
@@ -1201,7 +1282,6 @@ var Kernel;
                     scope.background.settings.width = _this.window.innerWidth;
                     scope.background.settings.height = _this.window.innerHeight;
                     scope.package = '/applications/system/ProcessManager/process-manager.ae';
-                    scope.desktopGrid = _this.desktop.initGrid();
                 }
             });
             // Register events
@@ -1303,10 +1383,10 @@ var Kernel;
         function DesktopGridDirective() {
             this.templateUrl = '/views/desktop.grid.directive.html';
             this.restrict = 'E';
-            this.bindToController = true;
-            this.scope = { 'grid': '=grid' };
+            this.bindToController = { 'grid': '=grid' };
+            this.scope = true;
             this.controller = 'DesktopGridDirectiveController';
-            this.controllerAs = 'grid';
+            this.controllerAs = 'controller';
         }
         DesktopGridDirective.Factory = function () {
             var factory = function () { return new DesktopGridDirective(); };
