@@ -3,6 +3,7 @@
 namespace riki34\BackendBundle\Controller;
 
 use Doctrine\ORM\EntityManager;
+use riki34\BackendBundle\Constants\ServerConstants;
 use riki34\BackendBundle\Entity\User;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -129,6 +130,11 @@ class DesktopController extends Controller {
             return new JsonResponse(['error' => $message], 404);
         }
 
-        $settings->uploadImage($uploaded);
+        $user = $em->getRepository('riki34BackendBundle:User')->findOneBy(['username' => 'test']);
+        $settings->uploadImage($uploaded, $user);
+        $em->persist($settings);
+        $em->flush();
+
+        return new JsonResponse(['image' => ServerConstants::WEB_DIR . $settings->getBackgroundImage()], 200);
     }
 }
