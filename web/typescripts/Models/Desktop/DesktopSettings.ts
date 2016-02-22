@@ -12,7 +12,7 @@ module Kernel {
 
         public getCss(): Object {
             return {
-                'background-image': this.backgroundImage,
+                'background-image': 'url(' + this.backgroundImage + ')',
                 'background-position': this.backgroundPosition,
                 'background-size': this.backgroundSize,
             };

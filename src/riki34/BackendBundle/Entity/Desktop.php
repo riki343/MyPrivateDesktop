@@ -63,13 +63,11 @@ class Desktop
         $this->grid = [];
     }
 
-
-    // TODO: implement getSettings() Function!
     public function getFullInArray() {
         return [
             'id' => $this->id,
             'userID' => $this->userId,
-            'settings' => $this->settings,
+            'settings' => $this->getSettings()->getFullInArray(),
             'grid' => $this->grid,
             'created' => $this->created->format(\DateTime::ISO8601),
             'updated' => $this->updated->format(\DateTime::ISO8601),
@@ -80,12 +78,13 @@ class Desktop
         return [
             'id' => $this->id,
             'userID' => $this->userId,
-            'settings' => $this->settings,
+            'settings' => $this->getSettings()->getFullInArray(),
             'grid' => $this->grid,
             'created' => $this->created->format(\DateTime::ISO8601),
             'updated' => $this->updated->format(\DateTime::ISO8601),
         ];
     }
+
 
 
     /**
@@ -147,30 +146,6 @@ class Desktop
     }
 
     /**
-     * Set settings
-     *
-     * @param array $settings
-     *
-     * @return Desktop
-     */
-    public function setSettings($settings)
-    {
-        $this->settings = $settings;
-
-        return $this;
-    }
-
-    /**
-     * Get settings
-     *
-     * @return array
-     */
-    public function getSettings()
-    {
-        return $this->settings;
-    }
-
-    /**
      * Set created
      *
      * @param \DateTime $created
@@ -216,5 +191,29 @@ class Desktop
     public function getUpdated()
     {
         return $this->updated;
+    }
+
+    /**
+     * Set settings
+     *
+     * @param \riki34\BackendBundle\Entity\DesktopSettings $settings
+     *
+     * @return Desktop
+     */
+    public function setSettings(\riki34\BackendBundle\Entity\DesktopSettings $settings = null)
+    {
+        $this->settings = $settings;
+
+        return $this;
+    }
+
+    /**
+     * Get settings
+     *
+     * @return \riki34\BackendBundle\Entity\DesktopSettings
+     */
+    public function getSettings()
+    {
+        return $this->settings;
     }
 }

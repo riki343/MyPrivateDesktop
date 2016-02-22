@@ -33,12 +33,12 @@ class DesktopController extends Controller {
         $desktop = $em->find('riki34BackendBundle:Desktop', $desktop_id);
 
         $serialized = $desktop->getFullInArray();
-        $serialized['settings'] = [
-            'backgroundImage' => "url('/images/1.jpg')",
-            'backgroundRepeat' => 'no-repeat',
-            'backgroundPosition' => 'center',
-            'backgroundSize' => 'cover'
-        ];
+//        $serialized['settings'] = [
+//            'backgroundImage' => "url('/images/1.jpg')",
+//            'backgroundRepeat' => 'no-repeat',
+//            'backgroundPosition' => 'center',
+//            'backgroundSize' => 'cover'
+//        ];
         return new JsonResponse($serialized);
     }
 

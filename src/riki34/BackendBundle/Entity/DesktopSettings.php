@@ -121,17 +121,17 @@ class DesktopSettings implements JsonEntity
 
     public function getFullInArray() {
         return [
-            'background-image'      => $this->getBackgroundImage(),
-            'background-position'   => $this->getBackgroundPosition(),
-            'background-size'       => $this->getBackgroundSize(),
+            'backgroundImage'      => $this->getBackgroundImage(),
+            'backgroundPosition'   => $this->getBackgroundPosition(),
+            'backgroundSize'       => $this->getBackgroundSize(),
         ];
     }
 
     public function getMinInArray() {
         return [
-            'background-image'      => $this->getBackgroundImage(),
-            'background-position'   => $this->getBackgroundPosition(),
-            'background-size'       => $this->getBackgroundSize(),
+            'backgroundImage'      => $this->getBackgroundImage(),
+            'backgroundPosition'   => $this->getBackgroundPosition(),
+            'backgroundSize'       => $this->getBackgroundSize(),
         ];
     }
 

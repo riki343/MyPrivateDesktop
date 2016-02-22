@@ -491,7 +491,7 @@ var Kernel;
         }
         DesktopSettings.prototype.getCss = function () {
             return {
-                'background-image': this.backgroundImage,
+                'background-image': 'url(' + this.backgroundImage + ')',
                 'background-position': this.backgroundPosition,
                 'background-size': this.backgroundSize,
             };
