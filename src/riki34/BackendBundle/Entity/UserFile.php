@@ -2,6 +2,7 @@
 
 namespace riki34\BackendBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use riki34\BackendBundle\Constants\ServerConstants;
@@ -96,12 +97,20 @@ class UserFile implements JsonEntity
     private $directory;
 
     /**
+     * @var ArrayCollection
+     * @ORM\ManyToMany(targetEntity="riki34\BackendBundle\Entity\AudioPlayerPlaylist", inversedBy="tracks")
+     */
+    private $playlists;
+
+    /**
      * UserFile constructor.
      * @param string|null $name
      * @param User|null $user
      * @param UserDirectory|null $directory
      */
     public function __construct($name = null, $user = null, $directory = null) {
+        $this->playlists = new ArrayCollection();
+
         $fs = new Filesystem();
         $this->name = $name;
         $this->setUser($user);
@@ -395,5 +404,39 @@ class UserFile implements JsonEntity
     public function getUpdated()
     {
         return $this->updated;
+    }
+
+    /**
+     * Add playlist
+     *
+     * @param \riki34\BackendBundle\Entity\AudioPlayerPlaylist $playlist
+     *
+     * @return UserFile
+     */
+    public function addPlaylist(\riki34\BackendBundle\Entity\AudioPlayerPlaylist $playlist)
+    {
+        $this->playlists[] = $playlist;
+
+        return $this;
+    }
+
+    /**
+     * Remove playlist
+     *
+     * @param \riki34\BackendBundle\Entity\AudioPlayerPlaylist $playlist
+     */
+    public function removePlaylist(\riki34\BackendBundle\Entity\AudioPlayerPlaylist $playlist)
+    {
+        $this->playlists->removeElement($playlist);
+    }
+
+    /**
+     * Get playlists
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getPlaylists()
+    {
+        return $this->playlists;
     }
 }

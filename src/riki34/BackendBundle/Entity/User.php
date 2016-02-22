@@ -31,10 +31,18 @@ class User extends BaseUser
      */
     private $directories;
 
+    /**
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="riki34\BackendBundle\Entity\AudioPlayerPlaylist", mappedBy="user")
+     */
+    private $playlists;
+
     public function __construct()
     {
         parent::__construct();
-        $this->files = new ArrayCollection();
+        $this->files        = new ArrayCollection();
+        $this->directories  = new ArrayCollection();
+        $this->playlists    = new ArrayCollection();
     }
 
     /**
@@ -103,5 +111,39 @@ class User extends BaseUser
     public function getDirectories()
     {
         return $this->directories;
+    }
+
+    /**
+     * Add playlist
+     *
+     * @param \riki34\BackendBundle\Entity\AudioPlayerPlaylist $playlist
+     *
+     * @return User
+     */
+    public function addPlaylist(\riki34\BackendBundle\Entity\AudioPlayerPlaylist $playlist)
+    {
+        $this->playlists[] = $playlist;
+
+        return $this;
+    }
+
+    /**
+     * Remove playlist
+     *
+     * @param \riki34\BackendBundle\Entity\AudioPlayerPlaylist $playlist
+     */
+    public function removePlaylist(\riki34\BackendBundle\Entity\AudioPlayerPlaylist $playlist)
+    {
+        $this->playlists->removeElement($playlist);
+    }
+
+    /**
+     * Get playlists
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getPlaylists()
+    {
+        return $this->playlists;
     }
 }
