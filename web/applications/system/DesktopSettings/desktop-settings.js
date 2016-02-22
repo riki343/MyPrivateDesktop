@@ -10,7 +10,7 @@
             .state('home', {
                 'url': '/desktop-settings/home',
                 'views': {
-                    'desktop-settings': { 'templateUrl': '/javascripts/Components/DesktopSettings/Views/index.html' }
+                    'desktop-settings': { 'templateUrl': 'applications/system/DesktopSettings/Views/index.html' }
                 }
             })
         ;
