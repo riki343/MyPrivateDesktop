@@ -3,6 +3,7 @@
 module Kernel {
     import IRequestShortcutConfig = angular.IRequestShortcutConfig;
     export class DesktopService {
+        private desktopID: number;
         public static $inject = ['$http', '$q', '$rootScope'];
 
         constructor(
@@ -20,20 +21,21 @@ module Kernel {
         }
 
         public getDesktop (id: number) {
-            var promise = this.http.get(Routing.generate('get-desktop', { 'desktop_id': id }));
+            this.desktopID = id;
+            let promise = this.http.get(Routing.generate('get-desktop', { 'desktop_id': id }));
             return this.handlePromise(promise);
         };
 
         public saveSettings (desktopID: number, settings: DesktopSettings) {
-            let promise = this.http.patch('/desktop/' + desktopID + '/settings', settings.getCss());
+            let promise = this.http.patch('/api/desktop/' + desktopID + '/settings', settings.getCss());
             return this.handlePromise(promise);
         }
 
         public changeBackground(file) {
             let formData = new FormData();
             formData.append('file', file);
-            let promise = this.http.patch(
-                '/desktop/settings/upload-image',
+            let promise = this.http.post(
+                '/api/desktop/' + this.desktopID +'settings/upload-image',
                 formData, {
                     'transformRequest': angular.identity,
                     'headers': {'Content-Type': undefined}

@@ -949,19 +949,20 @@ var Kernel;
             return this.handlePromise(promise);
         };
         DesktopService.prototype.getDesktop = function (id) {
+            this.desktopID = id;
             var promise = this.http.get(Routing.generate('get-desktop', { 'desktop_id': id }));
             return this.handlePromise(promise);
         };
         ;
         DesktopService.prototype.saveSettings = function (desktopID, settings) {
-            var promise = this.http.patch('/desktop/' + desktopID + '/settings', settings.getCss());
+            var promise = this.http.patch('/api/desktop/' + desktopID + '/settings', settings.getCss());
             return this.handlePromise(promise);
         };
         DesktopService.prototype.changeBackground = function (file) {
             var _this = this;
             var formData = new FormData();
             formData.append('file', file);
-            var promise = this.http.patch('/desktop/settings/upload-image', formData, {
+            var promise = this.http.post('/api/desktop/' + this.desktopID + 'settings/upload-image', formData, {
                 'transformRequest': angular.identity,
                 'headers': { 'Content-Type': undefined }
             });
