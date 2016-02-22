@@ -1,6 +1,7 @@
 /// <reference path='services.d.ts' />
 
 module Kernel {
+    import IRequestShortcutConfig = angular.IRequestShortcutConfig;
     export class DesktopService {
         public static $inject = ['$http', '$q', '$rootScope'];
 
@@ -32,7 +33,7 @@ module Kernel {
             let formData = new FormData();
             formData.append('file', file);
             let promise = this.http.patch('/desktop/settings/upload-image',
-                formData, { 'transformData': angular.identity }
+                formData, { 'transformRequest': angular.identity }
             );
 
             promise.then((response: any) => {

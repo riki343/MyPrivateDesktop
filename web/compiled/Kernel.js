@@ -485,19 +485,38 @@ var Kernel;
 (function (Kernel) {
     var DesktopSettings = (function () {
         function DesktopSettings(data) {
-            this.backgroundImage = data.backgroundImage;
-            this.backgroundRepeat = data.backgroundRepeat;
-            this.backgroundPosition = data.backgroundPosition;
-            this.backgroundSize = data.backgroundSize;
+            this._backgroundImage = data._backgroundImage;
+            this._backgroundPosition = data._backgroundPosition;
+            this._backgroundSize = data._backgroundSize;
         }
         DesktopSettings.prototype.getCss = function () {
             return {
-                'background-image': this.backgroundImage,
-                'background-repeat': this.backgroundRepeat,
-                'background-position': this.backgroundPosition,
-                'background-size': this.backgroundSize,
+                'background-image': this._backgroundImage,
+                'background-position': this._backgroundPosition,
+                'background-size': this._backgroundSize,
             };
         };
+        Object.defineProperty(DesktopSettings.prototype, "backgroundImage", {
+            set: function (value) {
+                this._backgroundImage = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DesktopSettings.prototype, "backgroundPosition", {
+            set: function (value) {
+                this._backgroundPosition = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DesktopSettings.prototype, "backgroundSize", {
+            set: function (value) {
+                this._backgroundSize = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
         return DesktopSettings;
     })();
     Kernel.DesktopSettings = DesktopSettings;
@@ -911,9 +930,10 @@ var Kernel;
 var Kernel;
 (function (Kernel) {
     var DesktopService = (function () {
-        function DesktopService(http, q) {
+        function DesktopService(http, q, rootScope) {
             this.http = http;
             this.q = q;
+            this.rootScope = rootScope;
         }
         DesktopService.prototype.saveGrid = function (id, grid) {
             var promise = this.http.put(Routing.generate('save-desktop-grid', { 'desktop_id': id }), grid);
@@ -924,19 +944,34 @@ var Kernel;
             return this.handlePromise(promise);
         };
         ;
+        DesktopService.prototype.saveSettings = function (desktopID, settings) {
+            var promise = this.http.patch('/desktop/' + desktopID + '/settings', settings.getCss());
+            return this.handlePromise(promise);
+        };
+        DesktopService.prototype.changeBackground = function (file) {
+            var _this = this;
+            var formData = new FormData();
+            formData.append('file', file);
+            var promise = this.http.patch('/desktop/settings/upload-image', formData, { 'transformRequest': angular.identity });
+            promise.then(function (response) {
+                _this.rootScope.$broadcast('DesktopImageChanged', response.image);
+            });
+            return this.handlePromise(promise);
+        };
         DesktopService.prototype.handlePromise = function (promise) {
             var defer = this.q.defer();
-            promise
-                .success(function (response) {
+            promise.success(function (response) {
                 defer.resolve(response);
             });
             return defer.promise;
         };
         DesktopService.Factory = function () {
-            var desktopService = function ($http, $q) { return new DesktopService($http, $q); };
+            var desktopService = function ($http, $q, $rootScope) {
+                return new DesktopService($http, $q, $rootScope);
+            };
             return desktopService;
         };
-        DesktopService.$inject = ['$http', '$q'];
+        DesktopService.$inject = ['$http', '$q', '$rootScope'];
         return DesktopService;
     })();
     Kernel.DesktopService = DesktopService;
