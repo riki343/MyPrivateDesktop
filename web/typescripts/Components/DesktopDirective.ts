@@ -71,7 +71,7 @@ module Kernel {
 
         // EVENTS
         public DesktopImageChanged = (event, data) => {
-            this.scope.background.settings['background-image'] = data;
+            this.scope.background.settings['background-image'] = 'url(\'' + data + '\')';
         };
 
         public DesktopGridStateChanged = (event, data) => {

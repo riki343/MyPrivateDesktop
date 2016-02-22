@@ -32,8 +32,12 @@ module Kernel {
         public changeBackground(file) {
             let formData = new FormData();
             formData.append('file', file);
-            let promise = this.http.patch('/desktop/settings/upload-image',
-                formData, { 'transformRequest': angular.identity }
+            let promise = this.http.patch(
+                '/desktop/settings/upload-image',
+                formData, {
+                    'transformRequest': angular.identity,
+                    'headers': {'Content-Type': undefined}
+                }
             );
 
             promise.then((response: any) => {

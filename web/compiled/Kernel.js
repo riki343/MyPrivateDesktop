@@ -485,18 +485,21 @@ var Kernel;
 (function (Kernel) {
     var DesktopSettings = (function () {
         function DesktopSettings(data) {
-            this._backgroundImage = data._backgroundImage;
-            this._backgroundPosition = data._backgroundPosition;
-            this._backgroundSize = data._backgroundSize;
+            this._backgroundImage = data.backgroundImage;
+            this._backgroundPosition = data.backgroundPosition;
+            this._backgroundSize = data.backgroundSize;
         }
         DesktopSettings.prototype.getCss = function () {
             return {
-                'background-image': this._backgroundImage,
-                'background-position': this._backgroundPosition,
-                'background-size': this._backgroundSize,
+                'background-image': this.backgroundImage,
+                'background-position': this.backgroundPosition,
+                'background-size': this.backgroundSize,
             };
         };
         Object.defineProperty(DesktopSettings.prototype, "backgroundImage", {
+            get: function () {
+                return this._backgroundImage;
+            },
             set: function (value) {
                 this._backgroundImage = value;
             },
@@ -504,6 +507,9 @@ var Kernel;
             configurable: true
         });
         Object.defineProperty(DesktopSettings.prototype, "backgroundPosition", {
+            get: function () {
+                return this._backgroundPosition;
+            },
             set: function (value) {
                 this._backgroundPosition = value;
             },
@@ -511,6 +517,9 @@ var Kernel;
             configurable: true
         });
         Object.defineProperty(DesktopSettings.prototype, "backgroundSize", {
+            get: function () {
+                return this._backgroundSize;
+            },
             set: function (value) {
                 this._backgroundSize = value;
             },
@@ -952,7 +961,10 @@ var Kernel;
             var _this = this;
             var formData = new FormData();
             formData.append('file', file);
-            var promise = this.http.patch('/desktop/settings/upload-image', formData, { 'transformRequest': angular.identity });
+            var promise = this.http.patch('/desktop/settings/upload-image', formData, {
+                'transformRequest': angular.identity,
+                'headers': { 'Content-Type': undefined }
+            });
             promise.then(function (response) {
                 _this.rootScope.$broadcast('DesktopImageChanged', response.image);
             });
@@ -1286,7 +1298,7 @@ var Kernel;
             };
             // EVENTS
             this.DesktopImageChanged = function (event, data) {
-                _this.scope.background.settings['background-image'] = data;
+                _this.scope.background.settings['background-image'] = 'url(\'' + data + '\')';
             };
             this.DesktopGridStateChanged = function (event, data) {
                 _this.desktop.saveGrid(_this.scope.desktopId, _this.desktop.grid);

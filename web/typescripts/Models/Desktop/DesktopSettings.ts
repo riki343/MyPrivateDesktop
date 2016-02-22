@@ -5,16 +5,16 @@ module Kernel {
         private _backgroundSize;
 
         constructor(data?:any) {
-            this._backgroundImage = data._backgroundImage;
-            this._backgroundPosition = data._backgroundPosition;
-            this._backgroundSize = data._backgroundSize;
+            this._backgroundImage = data.backgroundImage;
+            this._backgroundPosition = data.backgroundPosition;
+            this._backgroundSize = data.backgroundSize;
         }
 
         public getCss(): Object {
             return {
-                'background-image': this._backgroundImage,
-                'background-position': this._backgroundPosition,
-                'background-size': this._backgroundSize,
+                'background-image': this.backgroundImage,
+                'background-position': this.backgroundPosition,
+                'background-size': this.backgroundSize,
             };
         }
 
@@ -28,6 +28,18 @@ module Kernel {
 
         set backgroundSize(value) {
             this._backgroundSize = value;
+        }
+
+        get backgroundImage() {
+            return this._backgroundImage;
+        }
+
+        get backgroundPosition() {
+            return this._backgroundPosition;
+        }
+
+        get backgroundSize() {
+            return this._backgroundSize;
         }
     }
 }
