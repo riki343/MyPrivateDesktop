@@ -1,24 +1,33 @@
 module Kernel {
     export class DesktopSettings {
-        private backgroundImage;
-        private backgroundRepeat;
-        private backgroundPosition;
-        private backgroundSize;
+        private _backgroundImage;
+        private _backgroundPosition;
+        private _backgroundSize;
 
         constructor(data?:any) {
-            this.backgroundImage = data.backgroundImage;
-            this.backgroundRepeat = data.backgroundRepeat;
-            this.backgroundPosition = data.backgroundPosition;
-            this.backgroundSize = data.backgroundSize;
+            this._backgroundImage = data._backgroundImage;
+            this._backgroundPosition = data._backgroundPosition;
+            this._backgroundSize = data._backgroundSize;
         }
 
-        public getCss() {
+        public getCss(): Object {
             return {
-                'background-image': this.backgroundImage,
-                'background-repeat': this.backgroundRepeat,
-                'background-position': this.backgroundPosition,
-                'background-size': this.backgroundSize,
+                'background-image': this._backgroundImage,
+                'background-position': this._backgroundPosition,
+                'background-size': this._backgroundSize,
             };
+        }
+
+        set backgroundImage(value) {
+            this._backgroundImage = value;
+        }
+
+        set backgroundPosition(value) {
+            this._backgroundPosition = value;
+        }
+
+        set backgroundSize(value) {
+            this._backgroundSize = value;
         }
     }
 }

@@ -2,12 +2,16 @@
 
 module Kernel {
     export class DesktopService {
-        public static $inject = ['$http', '$q'];
+        public static $inject = ['$http', '$q', '$rootScope'];
 
-        constructor(private http: ng.IHttpService, private q: ng.IQService) {}
+        constructor(
+            private http: ng.IHttpService,
+            private q: ng.IQService,
+            private rootScope: ng.IRootScopeService
+        ) {}
 
         public saveGrid (id: number, grid: Array<Array<DesktopItem>>) {
-            var promise = this.http.put(Routing.generate('save-desktop-grid',
+            let promise = this.http.put(Routing.generate('save-desktop-grid',
                 { 'desktop_id': id }), grid
             );
 
@@ -19,19 +23,40 @@ module Kernel {
             return this.handlePromise(promise);
         };
 
+        public saveSettings (desktopID: number, settings: DesktopSettings) {
+            let promise = this.http.patch('/desktop/' + desktopID + '/settings', settings.getCss());
+            return this.handlePromise(promise);
+        }
+
+        public changeBackground(file) {
+            let formData = new FormData();
+            formData.append('file', file);
+            let promise = this.http.patch('/desktop/settings/upload-image',
+                formData, { 'transformData': angular.identity }
+            );
+
+            promise.then((response: any) => {
+                this.rootScope.$broadcast('DesktopImageChanged', response.image);
+            });
+
+            return this.handlePromise(promise);
+        }
+
         private handlePromise(promise) {
             var defer = this.q.defer();
-            promise
-                .success(function (response) {
-                    defer.resolve(response);
-                })
-            ;
+            promise.success(function (response) {
+                defer.resolve(response);
+            });
 
             return defer.promise;
         }
 
         public static Factory() {
-            const desktopService = ($http: ng.IHttpService, $q: ng.IQService) => new DesktopService($http, $q);
+            const desktopService = (
+                $http: ng.IHttpService,
+                $q: ng.IQService,
+                $rootScope: ng.IRootScopeService
+            ) => new DesktopService($http, $q, $rootScope);
 
             return desktopService;
         }

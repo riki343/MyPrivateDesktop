@@ -37,9 +37,8 @@ class Desktop
     private $grid;
 
     /**
-     * @var array
-     *
-     * @ORM\Column(name="settings", type="array")
+     * @var DesktopSettings
+     * @ORM\OneToOne(targetEntity="riki34\BackendBundle\Entity\DesktopSettings", mappedBy="desktop")
      */
     private $settings;
 
