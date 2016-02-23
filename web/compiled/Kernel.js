@@ -939,36 +939,37 @@ var Kernel;
 var Kernel;
 (function (Kernel) {
     var DesktopService = (function () {
-        function DesktopService(http, q, rootScope) {
+        function DesktopService(http, q, rootScope, window) {
+            var _this = this;
             this.http = http;
             this.q = q;
             this.rootScope = rootScope;
+            this.window = window;
+            this.getDesktop = function (id) {
+                _this.desktopID = id;
+                var promise = _this.http.get(Routing.generate('get-desktop', { 'desktop_id': id }));
+                return _this.handlePromise(promise);
+            };
+            this.changeBackground = function (file) {
+                var formData = new FormData();
+                formData.append('file', file);
+                var promise = _this.http.post('/api/desktop/' + _this.desktopID + '/settings/upload-image', formData, {
+                    'transformRequest': angular.identity,
+                    'headers': { 'Content-Type': undefined }
+                });
+                promise.success(function (response) {
+                    _this.rootScope.$broadcast('DesktopImageChanged', response.image);
+                });
+                return _this.handlePromise(promise);
+            };
+            this.desktopID = null;
         }
         DesktopService.prototype.saveGrid = function (id, grid) {
             var promise = this.http.put(Routing.generate('save-desktop-grid', { 'desktop_id': id }), grid);
             return this.handlePromise(promise);
         };
-        DesktopService.prototype.getDesktop = function (id) {
-            this.desktopID = id;
-            var promise = this.http.get(Routing.generate('get-desktop', { 'desktop_id': id }));
-            return this.handlePromise(promise);
-        };
-        ;
         DesktopService.prototype.saveSettings = function (desktopID, settings) {
             var promise = this.http.patch('/api/desktop/' + desktopID + '/settings', settings.getCss());
-            return this.handlePromise(promise);
-        };
-        DesktopService.prototype.changeBackground = function (file) {
-            var _this = this;
-            var formData = new FormData();
-            formData.append('file', file);
-            var promise = this.http.post('/api/desktop/' + this.desktopID + 'settings/upload-image', formData, {
-                'transformRequest': angular.identity,
-                'headers': { 'Content-Type': undefined }
-            });
-            promise.then(function (response) {
-                _this.rootScope.$broadcast('DesktopImageChanged', response.image);
-            });
             return this.handlePromise(promise);
         };
         DesktopService.prototype.handlePromise = function (promise) {
@@ -979,12 +980,15 @@ var Kernel;
             return defer.promise;
         };
         DesktopService.Factory = function () {
-            var desktopService = function ($http, $q, $rootScope) {
-                return new DesktopService($http, $q, $rootScope);
+            var desktopService = function ($http, $q, $rootScope, $window) {
+                if (angular.isDefined($window.superScope.desktopService) === false) {
+                    $window.superScope.desktopService = new DesktopService($http, $q, $rootScope, $window); // singleton
+                }
+                return $window.superScope.desktopService;
             };
             return desktopService;
         };
-        DesktopService.$inject = ['$http', '$q', '$rootScope'];
+        DesktopService.$inject = ['$http', '$q', '$rootScope', '$window'];
         return DesktopService;
     })();
     Kernel.DesktopService = DesktopService;
