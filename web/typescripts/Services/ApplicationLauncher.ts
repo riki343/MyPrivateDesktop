@@ -115,6 +115,10 @@ module Kernel {
             $rootScope.collapse   = application.collapse;
             $rootScope.makeActive = application.makeActive;
 
+            $rootScope.onMouseMoveOnMe   = application.onMouseMoveOnMe;
+            $rootScope.onMouseDownResize = application.onMouseDownResize;
+            $rootScope.onMouseUpResize   = application.onMouseUpResize;
+
             application.$scope = $rootScope;
         };
 

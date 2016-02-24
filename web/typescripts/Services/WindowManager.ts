@@ -1,12 +1,15 @@
 module Kernel {
     export class WindowManager extends WindowContainer {
+        private _document: ng.IDocumentService;
+        private _rootScope: ng.IRootScopeService;
+
         public static $inject = ['$document', '$rootScope'];
 
-        constructor(
-            private document: ng.IDocumentService,
-            private rootScope: ng.IRootScopeService
-        ) {
+        constructor(document: ng.IDocumentService, rootScope: ng.IRootScopeService) {
             super();
+
+            this._document = document;
+            this._rootScope = rootScope;
         }
 
         public collapseWindow(pid: number) {
@@ -46,18 +49,18 @@ module Kernel {
                         'top': window.process.settings.windowBox.top + 'px',
                         'left': window.process.settings.windowBox.left + 'px'
                     }, 550, () => {
-                        this.rootScope.$broadcast('WindowStateChanged', window.pid);
+                        this._rootScope.$broadcast('WindowStateChanged', window.pid);
                     });
                     window.template.removeClass('maximized');
                 } else {
                     window.process.maximized = true;
                     window.template.animate({
-                        'height': this.document.innerHeight() + 'px',
-                        'width' : this.document.innerWidth() + 'px',
+                        'height': this._document.innerHeight() + 'px',
+                        'width' : this._document.innerWidth() + 'px',
                         'top'   : '0',
                         'left'  : '0'
                     }, 550, () => {
-                        this.rootScope.$broadcast('WindowStateChanged', window.pid);
+                        this._rootScope.$broadcast('WindowStateChanged', window.pid);
                     });
                     window.template.addClass('maximized');
                 }
@@ -90,6 +93,23 @@ module Kernel {
             ) => new WindowManager($document, $rootScope);
 
             return factory;
+        }
+
+
+        get document():ng.IDocumentService {
+            return this._document;
+        }
+
+        set document(value:ng.IDocumentService) {
+            this._document = value;
+        }
+
+        get rootScope():ng.IRootScopeService {
+            return this._rootScope;
+        }
+
+        set rootScope(value:ng.IRootScopeService) {
+            this._rootScope = value;
         }
     }
 }

@@ -103,10 +103,91 @@ var Kernel;
             this.maximize = function () { _this.windowManager.maximizeWindow(_this.pid); };
             this.makeActive = function () { _this.windowManager.setActive(_this.pid); };
             this.onMouseDown = function (e) {
-                if (e.which === 1 && _this.maximized === false) {
+                if (e.which === 1 && _this.maximized === false &&
+                    _this.isCursorModified === false && _this.isResizing === false) {
                     _this.prevX = e.pageX;
                     _this.prevY = e.pageY;
                     _this.isDrags = true;
+                }
+            };
+            this.onMouseDownResize = function (e) {
+                if (_this.isCursorModified === true) {
+                    _this.isResizing = true;
+                }
+            };
+            this.onMouseUpResize = function (e) {
+                if (_this.isCursorModified === true && _this.isResizing === true) {
+                    _this.isResizing = false;
+                }
+            };
+            this.onMouseMoveOnMe = function (e) {
+                if (_this.maximized === false) {
+                    var area = _this.detectArea(e.clientX, e.clientY);
+                    if (_this.isResizing === false) {
+                        if (area !== null) {
+                            _this.window.css('cursor', area);
+                            _this.isCursorModified = true;
+                        }
+                        else if (_this.isCursorModified === true) {
+                            _this.window.css('cursor', 'default');
+                            _this.isCursorModified = false;
+                        }
+                    }
+                    else if (area !== null) {
+                        var diffY = e.clientY - _this.settings.windowBox.top;
+                        if (area === 'w-resize') {
+                            var diffX = e.clientX - _this.settings.windowBox.left;
+                            _this.settings.windowBox.left += diffX;
+                            _this.settings.windowBox.width += diffX;
+                            _this.resizeWidth(_this.settings.windowBox.left, _this.settings.windowBox.width);
+                        }
+                        else if (area === 'e-resize') {
+                            var diffX = e.clientX - _this.settings.windowBox.left + _this.settings.windowBox.width;
+                            _this.settings.windowBox.left += diffX;
+                            _this.settings.windowBox.width += diffX;
+                            _this.resizeWidth(_this.settings.windowBox.left, _this.settings.windowBox.width);
+                        }
+                        else if (area === 's-resize') {
+                            _this.settings.windowBox.top += diffY;
+                            _this.settings.windowBox.height += diffY;
+                            _this.resizeHeight(_this.settings.windowBox.top, _this.settings.windowBox.height);
+                        }
+                        else if (area === 'n-resize') {
+                            _this.settings.windowBox.top += diffY;
+                            _this.settings.windowBox.height -= diffY;
+                            _this.resizeHeight(_this.settings.windowBox.top, _this.settings.windowBox.height);
+                        }
+                        _this.windowManager.rootScope.$broadcast('WindowStateChanged', _this);
+                    }
+                }
+            };
+            this.resizeHeight = function (top, height) {
+                _this.window.css('top', top + 'px');
+                _this.window.css('height', height + 'px');
+            };
+            this.resizeWidth = function (left, width) {
+                _this.window.css('left', left + 'px');
+                _this.window.css('width', width + 'px');
+            };
+            this.detectArea = function (x, y) {
+                var minX = _this.settings.windowBox.left;
+                var maxX = _this.settings.windowBox.left + _this.settings.windowBox.width;
+                var minY = _this.settings.windowBox.top;
+                var maxY = _this.settings.windowBox.top + _this.settings.windowBox.height;
+                if (x >= minX && x <= minX + 6) {
+                    return 'w-resize';
+                }
+                else if (x <= maxX && x >= maxX - 6) {
+                    return 'e-resize';
+                }
+                else if (y <= maxY && y >= maxY - 6) {
+                    return 's-resize';
+                }
+                else if (y >= minY && y <= minY + 6) {
+                    return 'n-resize';
+                }
+                else if (_this.isCursorModified === true) {
+                    return null;
                 }
             };
             this.onMouseMove = function (e) {
@@ -136,7 +217,9 @@ var Kernel;
                         'width: ' + settings.windowBox.width + 'px;' +
                         'height: ' + settings.windowBox.height + 'px;"' +
                         'class="no-select application"' +
-                        'ng-mousedown="makeActive();">',
+                        'ng-mousedown="makeActive(); onMouseDownResize($event);" ' +
+                        'ng-mousemove="onMouseMoveOnMe($event);" ' +
+                        'ng-mouseup="onMouseUpResize($event); ng-mouseleave="onMouseUpResize($event);">',
                     '<p class="application-header" style="background-color: ' + settings.header.bgColor + ';" ng-mousedown=\"onMouseDown($event);\">',
                     '<span class="menu-button" ng-click="close();"><i class="fa fa-close fa-fw"></i></span>',
                     '<span class="menu-button" ng-click="maximize();"><i class="fa fa-windows fa-fw"></i></span>',
@@ -160,6 +243,8 @@ var Kernel;
             this._collapsed = false;
             this._maximized = false;
             this._active = true;
+            this.isCursorModified = false;
+            this.isResizing = false;
         }
         Object.defineProperty(Application.prototype, "template", {
             get: function () {
@@ -257,6 +342,26 @@ var Kernel;
             },
             set: function (value) {
                 this._active = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Application.prototype, "isCursorModified", {
+            get: function () {
+                return this._isCursorModified;
+            },
+            set: function (value) {
+                this._isCursorModified = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Application.prototype, "isResizing", {
+            get: function () {
+                return this._isResizing;
+            },
+            set: function (value) {
+                this._isResizing = value;
             },
             enumerable: true,
             configurable: true
@@ -1070,6 +1175,9 @@ var Kernel;
                 $rootScope.maximize = application.maximize;
                 $rootScope.collapse = application.collapse;
                 $rootScope.makeActive = application.makeActive;
+                $rootScope.onMouseMoveOnMe = application.onMouseMoveOnMe;
+                $rootScope.onMouseDownResize = application.onMouseDownResize;
+                $rootScope.onMouseUpResize = application.onMouseUpResize;
                 application.$scope = $rootScope;
             };
             // *************** EVENTS ***************
@@ -1156,8 +1264,6 @@ var Kernel;
         function WindowManager(document, rootScope) {
             var _this = this;
             _super.call(this);
-            this.document = document;
-            this.rootScope = rootScope;
             this.maximizeWindow = function (pid) {
                 var window = _this.getWindow(pid);
                 if (window !== null) {
@@ -1169,24 +1275,26 @@ var Kernel;
                             'top': window.process.settings.windowBox.top + 'px',
                             'left': window.process.settings.windowBox.left + 'px'
                         }, 550, function () {
-                            _this.rootScope.$broadcast('WindowStateChanged', window.pid);
+                            _this._rootScope.$broadcast('WindowStateChanged', window.pid);
                         });
                         window.template.removeClass('maximized');
                     }
                     else {
                         window.process.maximized = true;
                         window.template.animate({
-                            'height': _this.document.innerHeight() + 'px',
-                            'width': _this.document.innerWidth() + 'px',
+                            'height': _this._document.innerHeight() + 'px',
+                            'width': _this._document.innerWidth() + 'px',
                             'top': '0',
                             'left': '0'
                         }, 550, function () {
-                            _this.rootScope.$broadcast('WindowStateChanged', window.pid);
+                            _this._rootScope.$broadcast('WindowStateChanged', window.pid);
                         });
                         window.template.addClass('maximized');
                     }
                 }
             };
+            this._document = document;
+            this._rootScope = rootScope;
         }
         WindowManager.prototype.collapseWindow = function (pid) {
             var window = this.getWindow(pid);
@@ -1234,6 +1342,26 @@ var Kernel;
             };
             return factory;
         };
+        Object.defineProperty(WindowManager.prototype, "document", {
+            get: function () {
+                return this._document;
+            },
+            set: function (value) {
+                this._document = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(WindowManager.prototype, "rootScope", {
+            get: function () {
+                return this._rootScope;
+            },
+            set: function (value) {
+                this._rootScope = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
         WindowManager.$inject = ['$document', '$rootScope'];
         return WindowManager;
     })(Kernel.WindowContainer);
