@@ -1,3 +1,10 @@
 <div ng-controller="desktopSettingsController as settings" style="height: 100%;">
-
+    <div class="row" style="position: relative; height: 100%;">
+        <div class="col-xs-12" style="height: 100%;">
+            <div class="desktop-settings-container">
+                <input type="file" desktop-settings file-model="settings.newBackgroundImage"/>
+                <button ng-click="settings.uploadFile()">upload me</button>
+            </div>
+        </div>
+    </div>
 </div>

@@ -12,6 +12,10 @@
       "type": "controller",
       "name": "desktopSettingsController",
       "file": "Controllers/desktop-settings.controller.js"
+    }, {
+      "type": "directive",
+      "name": "desktopSettingsDirective",
+      "file": "Directives/desktop-settings.directive.js"
     }
   ],
   "stylesheet": [
