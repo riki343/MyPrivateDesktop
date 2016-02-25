@@ -15,6 +15,7 @@ module Kernel {
         private _active   : boolean;
         private _isCursorModified: boolean;
         private _isResizing: boolean;
+        private _resizeType: string;
 
         constructor(
             name: string, settings: ApplicationWindowSettings,
@@ -22,8 +23,8 @@ module Kernel {
             private windowManager: WindowManager
         ) {
             super(name, processManager);
-            this._settings = settings;
-            this._template = this.createTemplate(settings);
+            this._settings  = settings;
+            this._template  = this.createTemplate(settings);
             this._collapsed = false;
             this._maximized = false;
             this._active    = true;
@@ -31,35 +32,37 @@ module Kernel {
             this.isResizing = false;
         }
 
-        public collapse = () => { this.windowManager.collapseWindow(this.pid); };
-        public maximize = () => { this.windowManager.maximizeWindow(this.pid); };
+        public collapse   = () => { this.windowManager.collapseWindow(this.pid); };
+        public maximize   = () => { this.windowManager.maximizeWindow(this.pid); };
         public makeActive = () => { this.windowManager.setActive(this.pid); };
 
         public onMouseDown = (e: DragEvent) => {
             if (e.which === 1 && this.maximized === false &&
                 this.isCursorModified === false && this.isResizing === false)
             {
-                this.prevX = e.pageX;
-                this.prevY = e.pageY;
+                this.prevX   = e.pageX;
+                this.prevY   = e.pageY;
                 this.isDrags = true;
             }
         };
 
         public onMouseDownResize = (e: DragEvent) => {
-            if (this.isCursorModified === true) {
+            if (this.active === true) {
                 this.isResizing = true;
+                this.resizeType = this.detectArea(e.clientX, e.clientY);
             }
         };
 
         public onMouseUpResize = (e: DragEvent) => {
-            if (this.isCursorModified === true && this.isResizing === true) {
+            if (this.active === true) {
                 this.isResizing = false;
+                this.resizeType = null;
             }
         };
 
         public onMouseMoveOnMe = (e: DragEvent) => {
             if (this.maximized === false) {
-                let area: string = this.detectArea(e.clientX, e.clientY);
+                let area = this.detectArea(e.clientX, e.clientY);
                 if (this.isResizing === false) {
                     if (area !== null) {
                         this.window.css('cursor', area);
@@ -68,23 +71,23 @@ module Kernel {
                         this.window.css('cursor', 'default');
                         this.isCursorModified = false;
                     }
-                } else if (area !== null) {
-                    let diffY = e.clientY - this.settings.windowBox.top;
-                    if (area === 'w-resize') {
+                } else if (this.isResizing === true) {
+                    console.log(this.resizeType);
+                    if (this.resizeType === 'w-resize') { // left
                         let diffX = e.clientX - this.settings.windowBox.left;
                         this.settings.windowBox.left += diffX;
-                        this.settings.windowBox.width += diffX;
+                        this.settings.windowBox.width -= diffX;
                         this.resizeWidth(this.settings.windowBox.left, this.settings.windowBox.width);
-                    } else if (area === 'e-resize') {
-                        let diffX = e.clientX - this.settings.windowBox.left + this.settings.windowBox.width;
-                        this.settings.windowBox.left += diffX;
-                        this.settings.windowBox.width += diffX;
+                    } else if (this.resizeType === 'e-resize') { // right
+                        this.settings.windowBox.width +=
+                            e.clientX - (this.settings.windowBox.left + this.settings.windowBox.width);
                         this.resizeWidth(this.settings.windowBox.left, this.settings.windowBox.width);
-                    } else if (area === 's-resize') {
-                        this.settings.windowBox.top += diffY;
-                        this.settings.windowBox.height += diffY;
+                    } else if (this.resizeType === 's-resize') { // bottom
+                        this.settings.windowBox.height +=
+                            e.clientY - (this.settings.windowBox.top + this.settings.windowBox.height);
                         this.resizeHeight(this.settings.windowBox.top, this.settings.windowBox.height);
-                    } else if (area === 'n-resize') {
+                    } else if (this.resizeType === 'n-resize') { // top
+                        let diffY = e.clientY - this.settings.windowBox.top;
                         this.settings.windowBox.top += diffY;
                         this.settings.windowBox.height -= diffY;
                         this.resizeHeight(this.settings.windowBox.top, this.settings.windowBox.height);
@@ -96,13 +99,17 @@ module Kernel {
         };
 
         private resizeHeight = (top: number, height: number) =>  {
-            this.window.css('top', top + 'px');
-            this.window.css('height', height + 'px');
+            if (this.settings.windowBox.height > 80 || height > this.settings.windowBox.height) {
+                this.window.css('top', top + 'px');
+                this.window.css('height', height + 'px');
+            }
         };
 
         private resizeWidth = (left: number, width: number) => {
-            this.window.css('left', left + 'px');
-            this.window.css('width', width + 'px');
+            if (this.settings.windowBox.width > 80 || width > this.settings.windowBox.width) {
+                this.window.css('left', left + 'px');
+                this.window.css('width', width + 'px');
+            }
         };
 
         private detectArea = (x: number, y: number): string => {
@@ -111,17 +118,18 @@ module Kernel {
             let minY = this.settings.windowBox.top;
             let maxY = this.settings.windowBox.top + this.settings.windowBox.height;
 
-            if (x >= minX && x <= minX + 6) {
+            if (x >= minX - 2 && x < minX + 6) {
                 return 'w-resize';
-            } else if (x <= maxX && x >= maxX - 6) {
+            } else if (x <= maxX + 2 && x >= maxX - 6) {
                 return 'e-resize';
-            } else if (y <= maxY && y >= maxY - 6) {
+            } else if (y <= maxY + 2 && y >= maxY - 6) {
                 return 's-resize';
-            } else if (y >= minY && y <= minY + 6) {
+            } else if (y >= minY - 2 && y <= minY + 6) {
                 return 'n-resize';
-            } else if (this.isCursorModified === true) {
+            } else {
                 return null;
             }
+
         };
 
         public onMouseMove = (e: DragEvent) => {
@@ -150,16 +158,15 @@ module Kernel {
 
         private createTemplate = (settings: ApplicationWindowSettings): string => {
             return [
-                '<div style="color: ' +settings.header.textColor +'; ' +
-                    'top: '+ settings.windowBox.top + 'px; ' +
-                    'left: ' + settings.windowBox.left +'px; ' +
-                    'width: ' + settings.windowBox.width + 'px;' +
-                    'height: ' + settings.windowBox.height + 'px;"' +
-                    'class="no-select application"' +
-                    'ng-mousedown="makeActive(); onMouseDownResize($event);" ' +
-                    'ng-mousemove="onMouseMoveOnMe($event);" ' +
-                    'ng-mouseup="onMouseUpResize($event); ng-mouseleave="onMouseUpResize($event);">',
-                        '<p class="application-header" style="background-color: ' + settings.header.bgColor + ';" ng-mousedown=\"onMouseDown($event);\">',
+                "<div style=\"color: " + settings.header.textColor +"; " +
+                    "top: " + settings.windowBox.top + "px; " +
+                    "left: " + settings.windowBox.left +"px; " +
+                    "width: " + settings.windowBox.width + "px;" +
+                    "height: " + settings.windowBox.height + "px;\"" +
+                    "class=\"no-select application\"" +
+                    "ng-mousedown=\"makeActive(); onMouseDownResize($event);\">",
+                        '<p class="application-header" style="background-color: ' + settings.header.bgColor +';" ' +
+                        'ng-mousedown=\"onMouseDown($event);\">',
                             '<span class="menu-button" ng-click="close();"><i class="fa fa-close fa-fw"></i></span>',
                             '<span class="menu-button" ng-click="maximize();"><i class="fa fa-windows fa-fw"></i></span>',
                             '<span class="menu-button" ng-click="collapse();"><i class="fa fa-minus fa-fw"></i></span>',
@@ -274,6 +281,14 @@ module Kernel {
 
         set isResizing(value:boolean) {
             this._isResizing = value;
+        }
+
+        get resizeType():string {
+            return this._resizeType;
+        }
+
+        set resizeType(value:string) {
+            this._resizeType = value;
         }
     }
 }

@@ -111,13 +111,15 @@ var Kernel;
                 }
             };
             this.onMouseDownResize = function (e) {
-                if (_this.isCursorModified === true) {
+                if (_this.active === true) {
                     _this.isResizing = true;
+                    _this.resizeType = _this.detectArea(e.clientX, e.clientY);
                 }
             };
             this.onMouseUpResize = function (e) {
-                if (_this.isCursorModified === true && _this.isResizing === true) {
+                if (_this.active === true) {
                     _this.isResizing = false;
+                    _this.resizeType = null;
                 }
             };
             this.onMouseMoveOnMe = function (e) {
@@ -133,26 +135,26 @@ var Kernel;
                             _this.isCursorModified = false;
                         }
                     }
-                    else if (area !== null) {
-                        var diffY = e.clientY - _this.settings.windowBox.top;
-                        if (area === 'w-resize') {
+                    else if (_this.isResizing === true) {
+                        console.log(_this.resizeType);
+                        if (_this.resizeType === 'w-resize') {
                             var diffX = e.clientX - _this.settings.windowBox.left;
                             _this.settings.windowBox.left += diffX;
-                            _this.settings.windowBox.width += diffX;
+                            _this.settings.windowBox.width -= diffX;
                             _this.resizeWidth(_this.settings.windowBox.left, _this.settings.windowBox.width);
                         }
-                        else if (area === 'e-resize') {
-                            var diffX = e.clientX - _this.settings.windowBox.left + _this.settings.windowBox.width;
-                            _this.settings.windowBox.left += diffX;
-                            _this.settings.windowBox.width += diffX;
+                        else if (_this.resizeType === 'e-resize') {
+                            _this.settings.windowBox.width +=
+                                e.clientX - (_this.settings.windowBox.left + _this.settings.windowBox.width);
                             _this.resizeWidth(_this.settings.windowBox.left, _this.settings.windowBox.width);
                         }
-                        else if (area === 's-resize') {
-                            _this.settings.windowBox.top += diffY;
-                            _this.settings.windowBox.height += diffY;
+                        else if (_this.resizeType === 's-resize') {
+                            _this.settings.windowBox.height +=
+                                e.clientY - (_this.settings.windowBox.top + _this.settings.windowBox.height);
                             _this.resizeHeight(_this.settings.windowBox.top, _this.settings.windowBox.height);
                         }
-                        else if (area === 'n-resize') {
+                        else if (_this.resizeType === 'n-resize') {
+                            var diffY = e.clientY - _this.settings.windowBox.top;
                             _this.settings.windowBox.top += diffY;
                             _this.settings.windowBox.height -= diffY;
                             _this.resizeHeight(_this.settings.windowBox.top, _this.settings.windowBox.height);
@@ -162,31 +164,35 @@ var Kernel;
                 }
             };
             this.resizeHeight = function (top, height) {
-                _this.window.css('top', top + 'px');
-                _this.window.css('height', height + 'px');
+                if (_this.settings.windowBox.height > 80 || height > _this.settings.windowBox.height) {
+                    _this.window.css('top', top + 'px');
+                    _this.window.css('height', height + 'px');
+                }
             };
             this.resizeWidth = function (left, width) {
-                _this.window.css('left', left + 'px');
-                _this.window.css('width', width + 'px');
+                if (_this.settings.windowBox.width > 80 || width > _this.settings.windowBox.width) {
+                    _this.window.css('left', left + 'px');
+                    _this.window.css('width', width + 'px');
+                }
             };
             this.detectArea = function (x, y) {
                 var minX = _this.settings.windowBox.left;
                 var maxX = _this.settings.windowBox.left + _this.settings.windowBox.width;
                 var minY = _this.settings.windowBox.top;
                 var maxY = _this.settings.windowBox.top + _this.settings.windowBox.height;
-                if (x >= minX && x <= minX + 6) {
+                if (x >= minX - 2 && x < minX + 6) {
                     return 'w-resize';
                 }
-                else if (x <= maxX && x >= maxX - 6) {
+                else if (x <= maxX + 2 && x >= maxX - 6) {
                     return 'e-resize';
                 }
-                else if (y <= maxY && y >= maxY - 6) {
+                else if (y <= maxY + 2 && y >= maxY - 6) {
                     return 's-resize';
                 }
-                else if (y >= minY && y <= minY + 6) {
+                else if (y >= minY - 2 && y <= minY + 6) {
                     return 'n-resize';
                 }
-                else if (_this.isCursorModified === true) {
+                else {
                     return null;
                 }
             };
@@ -211,16 +217,15 @@ var Kernel;
             };
             this.createTemplate = function (settings) {
                 return [
-                    '<div style="color: ' + settings.header.textColor + '; ' +
-                        'top: ' + settings.windowBox.top + 'px; ' +
-                        'left: ' + settings.windowBox.left + 'px; ' +
-                        'width: ' + settings.windowBox.width + 'px;' +
-                        'height: ' + settings.windowBox.height + 'px;"' +
-                        'class="no-select application"' +
-                        'ng-mousedown="makeActive(); onMouseDownResize($event);" ' +
-                        'ng-mousemove="onMouseMoveOnMe($event);" ' +
-                        'ng-mouseup="onMouseUpResize($event); ng-mouseleave="onMouseUpResize($event);">',
-                    '<p class="application-header" style="background-color: ' + settings.header.bgColor + ';" ng-mousedown=\"onMouseDown($event);\">',
+                    "<div style=\"color: " + settings.header.textColor + "; " +
+                        "top: " + settings.windowBox.top + "px; " +
+                        "left: " + settings.windowBox.left + "px; " +
+                        "width: " + settings.windowBox.width + "px;" +
+                        "height: " + settings.windowBox.height + "px;\"" +
+                        "class=\"no-select application\"" +
+                        "ng-mousedown=\"makeActive(); onMouseDownResize($event);\">",
+                    '<p class="application-header" style="background-color: ' + settings.header.bgColor + ';" ' +
+                        'ng-mousedown=\"onMouseDown($event);\">',
                     '<span class="menu-button" ng-click="close();"><i class="fa fa-close fa-fw"></i></span>',
                     '<span class="menu-button" ng-click="maximize();"><i class="fa fa-windows fa-fw"></i></span>',
                     '<span class="menu-button" ng-click="collapse();"><i class="fa fa-minus fa-fw"></i></span>',
@@ -362,6 +367,16 @@ var Kernel;
             },
             set: function (value) {
                 this._isResizing = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Application.prototype, "resizeType", {
+            get: function () {
+                return this._resizeType;
+            },
+            set: function (value) {
+                this._resizeType = value;
             },
             enumerable: true,
             configurable: true
@@ -1163,6 +1178,8 @@ var Kernel;
                 container.attr('class', application.name + '-main');
                 container.addClass('application-window');
                 container.css('height', application.settings.windowBox.height - 25 + 'px');
+                container.css('z-index', '1010');
+                container.css('position', 'relative');
                 appContainer.append(container);
                 _this.rootScope.$on('WindowStateChanged', application.onResize);
                 // Append template to div#applications-layer
@@ -1174,14 +1191,18 @@ var Kernel;
                 $rootScope.close = application.closeProcess;
                 // Define mouse events to move application
                 $rootScope.onMouseDown = application.onMouseDown;
-                _this.document.on('mousemove', application.onMouseMove);
-                _this.document.on('mouseup', application.onMouseUp);
+                _this.document.on('mousemove', function (event) {
+                    application.onMouseMove(event);
+                    application.onMouseMoveOnMe(event);
+                });
+                _this.document.on('mouseup', function (event) {
+                    application.onMouseUp(event);
+                    application.onMouseUpResize(event);
+                });
                 $rootScope.maximize = application.maximize;
                 $rootScope.collapse = application.collapse;
                 $rootScope.makeActive = application.makeActive;
-                $rootScope.onMouseMoveOnMe = application.onMouseMoveOnMe;
                 $rootScope.onMouseDownResize = application.onMouseDownResize;
-                $rootScope.onMouseUpResize = application.onMouseUpResize;
                 application.$scope = $rootScope;
             };
             // *************** EVENTS ***************

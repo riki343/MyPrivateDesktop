@@ -94,6 +94,8 @@ module Kernel {
             container.attr('class', application.name + '-main');
             container.addClass('application-window');
             container.css('height', application.settings.windowBox.height - 25 + 'px');
+            container.css('z-index', '1010');
+            container.css('position', 'relative');
             appContainer.append(container);
             this.rootScope.$on('WindowStateChanged', application.onResize);
 
@@ -108,17 +110,19 @@ module Kernel {
             $rootScope.close = application.closeProcess;
             // Define mouse events to move application
             $rootScope.onMouseDown = application.onMouseDown;
-            this.document.on('mousemove', application.onMouseMove);
-            this.document.on('mouseup', application.onMouseUp);
+            this.document.on('mousemove', (event: DragEvent) => {
+                application.onMouseMove(event);
+                application.onMouseMoveOnMe(event);
+            });
+            this.document.on('mouseup', (event: DragEvent) => {
+                application.onMouseUp(event);
+                application.onMouseUpResize(event);
+            });
 
             $rootScope.maximize   = application.maximize;
             $rootScope.collapse   = application.collapse;
             $rootScope.makeActive = application.makeActive;
-
-            $rootScope.onMouseMoveOnMe   = application.onMouseMoveOnMe;
             $rootScope.onMouseDownResize = application.onMouseDownResize;
-            $rootScope.onMouseUpResize   = application.onMouseUpResize;
-
             application.$scope = $rootScope;
         };
 
