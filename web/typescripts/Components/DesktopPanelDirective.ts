@@ -70,8 +70,8 @@ module Kernel {
             this.rootScope.$on('WindowClosed', this.onWindowClosed);
         }
 
-        public toggleWindow(pid: number) {
-            this.windowManager.collapseWindow(pid);
+        public toggleWindow(app: Application) {
+            app.collapse();
         }
 
         private onWindowCreated = (event, data: any) => {

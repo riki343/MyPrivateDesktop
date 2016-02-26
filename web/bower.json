@@ -24,6 +24,7 @@
     "videogular-buffering": "^1.4.1",
     "videogular-overlay-play": "^1.4.1",
     "videogular-poster": "^1.4.1",
-    "angular-file-upload": "^2.2.0"
+    "angular-file-upload": "^2.2.0",
+    "snabbt.js": "^0.6.4"
   }
 }

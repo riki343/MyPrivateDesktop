@@ -5,7 +5,7 @@
     <ul class="desktop-panel-applications-list">
         <li ng-repeat="app in panel.windowList"
             class="desktop-panel-applications-list-item"
-            ng-click="panel.toggleWindow(app.pid);">
+            ng-click="panel.toggleWindow(app.process);">
             {{ app.process.name }}
         </li>
     </ul>

@@ -99,8 +99,29 @@ var Kernel;
             var _this = this;
             _super.call(this, name, processManager);
             this.windowManager = windowManager;
-            this.collapse = function () { _this.windowManager.collapseWindow(_this.pid); };
-            this.maximize = function () { _this.windowManager.maximizeWindow(_this.pid); };
+            this.collapse = function () {
+                var left = _this.settings.windowBox.left + _this.settings.windowBox.width;
+                if (_this.collapsed === true) {
+                    // Check if window is maximized
+                    var left_1 = (_this.maximized === true)
+                        ? 0 : _this.settings.windowBox.left;
+                    snabbt(_this.window, {
+                        'position': [left_1 + 100, 0, 0],
+                        'duration': 550
+                    });
+                    _this.windowManager.setActive(_this.pid);
+                }
+                else {
+                    snabbt(_this.window, {
+                        'position': [-left - 100, 0, 0],
+                        'duration': 550
+                    });
+                }
+                _this.collapsed = !_this.collapsed;
+            };
+            this.maximize = function (top, left) {
+                _this.windowManager.maximizeWindow(_this.pid, top, left);
+            };
             this.makeActive = function () { _this.windowManager.setActive(_this.pid); };
             this.onMouseDown = function (e) {
                 if (e.which === 1 && _this.maximized === false &&
@@ -136,30 +157,32 @@ var Kernel;
                         }
                     }
                     else if (_this.isResizing === true) {
-                        console.log(_this.resizeType);
                         if (_this.resizeType === 'w-resize') {
                             var diffX = e.clientX - _this.settings.windowBox.left;
                             _this.settings.windowBox.left += diffX;
                             _this.settings.windowBox.width -= diffX;
                             _this.resizeWidth(_this.settings.windowBox.left, _this.settings.windowBox.width);
+                            _this.onResize();
                         }
                         else if (_this.resizeType === 'e-resize') {
                             _this.settings.windowBox.width +=
                                 e.clientX - (_this.settings.windowBox.left + _this.settings.windowBox.width);
                             _this.resizeWidth(_this.settings.windowBox.left, _this.settings.windowBox.width);
+                            _this.onResize();
                         }
                         else if (_this.resizeType === 's-resize') {
                             _this.settings.windowBox.height +=
                                 e.clientY - (_this.settings.windowBox.top + _this.settings.windowBox.height);
                             _this.resizeHeight(_this.settings.windowBox.top, _this.settings.windowBox.height);
+                            _this.onResize();
                         }
                         else if (_this.resizeType === 'n-resize') {
                             var diffY = e.clientY - _this.settings.windowBox.top;
                             _this.settings.windowBox.top += diffY;
                             _this.settings.windowBox.height -= diffY;
                             _this.resizeHeight(_this.settings.windowBox.top, _this.settings.windowBox.height);
+                            _this.onResize();
                         }
-                        _this.windowManager.rootScope.$broadcast('WindowStateChanged', _this);
                     }
                 }
             };
@@ -197,23 +220,99 @@ var Kernel;
                 }
             };
             this.onMouseMove = function (e) {
-                if (_this.isDrags === true && e.which === 1) {
+                if (_this.isDrags === true) {
                     _this.settings.windowBox.left += e.pageX - _this.prevX;
                     _this.settings.windowBox.top += e.pageY - _this.prevY;
                     _this.window.css('left', _this.settings.windowBox.left);
                     _this.window.css('top', _this.settings.windowBox.top);
                     _this.prevX = e.pageX;
                     _this.prevY = e.pageY;
+                    if (_this.windowManager.checkPosition(_this, e.clientX, e.clientY) === null) {
+                        if (_this.magnifyRegion !== null) {
+                            _this.magnifyRegion.remove();
+                        }
+                        _this.magnifyRegion = null;
+                        _this.isBeingMagnified = null;
+                    }
                 }
             };
-            this.onResize = function (e, data) {
-                if (data === _this.pid) {
-                    var view = _this.window.find('div.application-window');
-                    view.css('height', _this.window.height() - 25 + 'px');
-                }
+            this.onResize = function () {
+                var view = _this.window.find('div.application-window');
+                view.css('height', _this.window.height() - 25 + 'px');
             };
             this.onMouseUp = function (e) {
+                if (_this.isDrags === true && _this.isBeingMagnified !== null) {
+                    snabbt(_this.magnifyRegion, {
+                        'opacityFrom': '0.4',
+                        'opacity': '0.0',
+                        'duration': 200,
+                        'allDone': function () {
+                            _this.magnifyRegion.remove();
+                            _this.magnifyRegion = null;
+                        }
+                    });
+                    if (_this.isBeingMagnified === 'bottom' || _this.isBeingMagnified === 'top') {
+                        _this.maximize(50, 50);
+                    }
+                    else {
+                        var dimensions = _this.windowManager.getWindowDimensions();
+                        snabbt(_this.window, {
+                            'position': [
+                                (_this.isBeingMagnified === 'left')
+                                    ? -_this.settings.windowBox.left
+                                    : -_this.settings.windowBox.left + dimensions.width / 2,
+                                -_this.settings.windowBox.top
+                            ],
+                            'fromHeight': _this.settings.windowBox.height,
+                            'height': dimensions.height,
+                            'fromWidth': _this.settings.windowBox.width,
+                            'width': dimensions.width / 2,
+                            'duration': 550,
+                            'allDone': function () {
+                                _this.settings.windowBox.top = 0;
+                                if (_this.isBeingMagnified === 'left') {
+                                    _this.settings.windowBox.left = 0;
+                                }
+                                else {
+                                    _this.settings.windowBox.left = dimensions.width / 2;
+                                }
+                            }
+                        });
+                    }
+                }
                 _this.isDrags = false;
+            };
+            this.createMagnifyRegion = function (width, height, position, half) {
+                if (_this.magnifyRegion === null) {
+                    var element = angular.element('<div></div>');
+                    element.css('position', 'fixed');
+                    element.css('z-index', '500');
+                    element.css('opacity', '0.0');
+                    element.css(position, '0');
+                    element.css('top', '0');
+                    element.css('background-color', 'orangered');
+                    element.css('opacity', '0.4');
+                    _this.magnifyRegion = element;
+                    _this.windowManager.appendMagnifyArea(element);
+                    if (half === true) {
+                        element.css('width', '0');
+                        element.css('height', height + 'px');
+                        snabbt(element, {
+                            fromOpacity: 0.0, opacity: 0.4,
+                            fromWidth: 0, width: width,
+                            duration: 400
+                        });
+                    }
+                    else {
+                        element.css('height', '0');
+                        element.css('width', width + 'px');
+                        snabbt(element, {
+                            fromOpacity: 0.0, opacity: 0.4,
+                            fromHeight: 0, height: height,
+                            duration: 400
+                        });
+                    }
+                }
             };
             this.createTemplate = function (settings) {
                 return [
@@ -234,10 +333,12 @@ var Kernel;
                 ].join('');
             };
             this.closeProcess = function () {
-                _this.window.animate({
-                    'height': '0px'
-                }, 450, 'linear', function () {
-                    _this.close();
+                snabbt(_this.window, {
+                    position: [-_this.settings.windowBox.width - _this.settings.windowBox.left - 100, 0, 0],
+                    fromRotation: [0, 0, 2 * Math.PI],
+                    duration: 500,
+                    'easing': 'easeIn',
+                    'allDone': function () { _this.close(); }
                 });
             };
             this.runProcess = function () {
@@ -248,8 +349,10 @@ var Kernel;
             this._collapsed = false;
             this._maximized = false;
             this._active = true;
+            this.isBeingMagnified = null;
             this.isCursorModified = false;
             this.isResizing = false;
+            this.magnifyRegion = null;
         }
         Object.defineProperty(Application.prototype, "template", {
             get: function () {
@@ -377,6 +480,26 @@ var Kernel;
             },
             set: function (value) {
                 this._resizeType = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Application.prototype, "isBeingMagnified", {
+            get: function () {
+                return this._isBeingMagnified;
+            },
+            set: function (value) {
+                this._isBeingMagnified = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Application.prototype, "magnifyRegion", {
+            get: function () {
+                return this._magnifyRegion;
+            },
+            set: function (value) {
+                this._magnifyRegion = value;
             },
             enumerable: true,
             configurable: true
@@ -1181,7 +1304,6 @@ var Kernel;
                 container.css('z-index', '1010');
                 container.css('position', 'relative');
                 appContainer.append(container);
-                _this.rootScope.$on('WindowStateChanged', application.onResize);
                 // Append template to div#applications-layer
                 _this.applicationLayer.append(appContainer);
                 return appContainer;
@@ -1286,64 +1408,97 @@ var Kernel;
 (function (Kernel) {
     var WindowManager = (function (_super) {
         __extends(WindowManager, _super);
-        function WindowManager(document, rootScope) {
+        function WindowManager(document, rootScope, window) {
             var _this = this;
             _super.call(this);
-            this.maximizeWindow = function (pid) {
+            this.window = window;
+            this.appendMagnifyArea = function (area) {
+                _this.magnifyContainer.append(area);
+            };
+            this.checkPosition = function (process, mouseX, mouseY) {
+                var magnification = null;
+                if (_this.isLeft(mouseX) === true) {
+                    magnification = 'left';
+                }
+                else if (_this.isRight(mouseX) === true) {
+                    magnification = 'right';
+                }
+                else if (_this.isTop(mouseY) === true) {
+                    magnification = 'top';
+                }
+                if (magnification !== null) {
+                    if (magnification === 'left' || magnification === 'right') {
+                        var width = _this.window.innerWidth / 2;
+                        var height = _this.window.innerHeight;
+                        process.createMagnifyRegion(width, height, magnification, true);
+                    }
+                    else {
+                        var width = _this.window.innerWidth;
+                        var height = _this.window.innerHeight;
+                        process.createMagnifyRegion(width, height, magnification, false);
+                    }
+                }
+                return magnification;
+            };
+            this.maximizeWindow = function (pid, top, left) {
                 var window = _this.getWindow(pid);
                 if (window !== null) {
                     if (window.process.maximized === true) {
                         window.process.maximized = false;
-                        window.template.animate({
-                            'height': window.process.settings.windowBox.height + 'px',
-                            'width': window.process.settings.windowBox.width + 'px',
-                            'top': window.process.settings.windowBox.top + 'px',
-                            'left': window.process.settings.windowBox.left + 'px'
-                        }, 550, function () {
-                            _this._rootScope.$broadcast('WindowStateChanged', window.pid);
+                        snabbt(window.template, {
+                            'position': [window.process.settings.windowBox.left, window.process.settings.windowBox.top, 0],
+                            'height': window.process.settings.windowBox.height,
+                            'fromHeight': _this.document.innerHeight(),
+                            'width': window.process.settings.windowBox.width,
+                            'fromWidth': _this.document.innerWidth(),
+                            'duration': 550,
+                            'allDone': function () {
+                                window.process.onResize();
+                                window.process.settings.windowBox.top = top;
+                                window.process.settings.windowBox.left = left;
+                            }
                         });
                         window.template.removeClass('maximized');
                     }
                     else {
                         window.process.maximized = true;
-                        window.template.animate({
-                            'height': _this._document.innerHeight() + 'px',
-                            'width': _this._document.innerWidth() + 'px',
-                            'top': '0',
-                            'left': '0'
-                        }, 550, function () {
-                            _this._rootScope.$broadcast('WindowStateChanged', window.pid);
+                        snabbt(window.template, {
+                            'position': [-window.process.settings.windowBox.left, -window.process.settings.windowBox.top, 0],
+                            'fromHeight': window.process.settings.windowBox.height,
+                            'height': _this.document.innerHeight(),
+                            'fromWidth': window.process.settings.windowBox.width,
+                            'width': _this.document.innerWidth(),
+                            'duration': 550,
+                            'allDone': function () {
+                                window.process.onResize();
+                            }
                         });
                         window.template.addClass('maximized');
                     }
                 }
             };
+            this.getWindowDimensions = function () {
+                return {
+                    'width': _this.window.innerWidth,
+                    'height': _this.window.innerHeight,
+                };
+            };
+            this.isLeft = function (x) {
+                return x < 4;
+            };
+            this.isRight = function (x) {
+                return x > _this.window.innerWidth - 4;
+            };
+            this.isBottom = function (y) {
+                return y > _this.window.innerHeight - 4;
+            };
+            this.isTop = function (y) {
+                return y < 4;
+            };
             this._document = document;
             this._rootScope = rootScope;
+            this.magnifyContainer = document.find('#magnify-container');
         }
-        WindowManager.prototype.collapseWindow = function (pid) {
-            var window = this.getWindow(pid);
-            if (window !== null) {
-                var wl = this.windowList;
-                for (var i = 0; i < wl.length; i++) {
-                    if (wl[i].pid === pid) {
-                        if (wl[i].process.collapsed === true) {
-                            // Check if window is maximized
-                            var left = (wl[i].process.maximized === true)
-                                ? 0 : wl[i].process.settings.windowBox.left;
-                            wl[i].template.animate({ 'left': left + 'px' }, 550);
-                            this.setActive(wl[i].pid);
-                        }
-                        else {
-                            var left = (wl[i].template.width() < 5000) ? wl[i].template.width() + 300 : 5000;
-                            wl[i].template.animate({ 'left': -left + 'px' }, 550);
-                        }
-                        wl[i].process.collapsed = !wl[i].process.collapsed;
-                        break;
-                    }
-                }
-            }
-        };
         WindowManager.prototype.setActive = function (pid) {
             var window = this.getWindow(pid);
             if (window !== null) {
@@ -1362,8 +1517,8 @@ var Kernel;
             }
         };
         WindowManager.Factory = function () {
-            var factory = function ($document, $rootScope) {
-                return new WindowManager($document, $rootScope);
+            var factory = function ($document, $rootScope, $window) {
+                return new WindowManager($document, $rootScope, $window);
             };
             return factory;
         };
@@ -1387,7 +1542,7 @@ var Kernel;
             enumerable: true,
             configurable: true
         });
-        WindowManager.$inject = ['$document', '$rootScope'];
+        WindowManager.$inject = ['$document', '$rootScope', '$window'];
         return WindowManager;
     })(Kernel.WindowContainer);
     Kernel.WindowManager = WindowManager;
@@ -1570,8 +1725,8 @@ var Kernel;
             this.rootScope.$on('WindowCreated', this.onWindowCreated);
             this.rootScope.$on('WindowClosed', this.onWindowClosed);
         }
-        DesktopPanelDirectiveController.prototype.toggleWindow = function (pid) {
-            this.windowManager.collapseWindow(pid);
+        DesktopPanelDirectiveController.prototype.toggleWindow = function (app) {
+            app.collapse();
         };
         DesktopPanelDirectiveController.$inject = ['$rootScope', 'windowManagerService', '$scope', '$timeout'];
         return DesktopPanelDirectiveController;

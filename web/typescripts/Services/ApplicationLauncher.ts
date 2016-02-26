@@ -97,7 +97,6 @@ module Kernel {
             container.css('z-index', '1010');
             container.css('position', 'relative');
             appContainer.append(container);
-            this.rootScope.$on('WindowStateChanged', application.onResize);
 
             // Append template to div#applications-layer
             this.applicationLayer.append(appContainer);

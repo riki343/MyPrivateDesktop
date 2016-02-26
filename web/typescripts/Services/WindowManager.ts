@@ -2,65 +2,78 @@ module Kernel {
     export class WindowManager extends WindowContainer {
         private _document: ng.IDocumentService;
         private _rootScope: ng.IRootScopeService;
+        private magnifyContainer: JQuery;
 
-        public static $inject = ['$document', '$rootScope'];
+        public static $inject = ['$document', '$rootScope', '$window'];
 
-        constructor(document: ng.IDocumentService, rootScope: ng.IRootScopeService) {
+        constructor(document: ng.IDocumentService, rootScope: ng.IRootScopeService, private window: ng.IWindowService) {
             super();
 
             this._document = document;
             this._rootScope = rootScope;
+            this.magnifyContainer = document.find('#magnify-container');
         }
 
-        public collapseWindow(pid: number) {
-            let window = this.getWindow(pid);
-            if (window !== null) {
-                let wl = this.windowList;
-                for (let i = 0; i < wl.length; i++) {
-                    if (wl[i].pid === pid) {
-                        if (wl[i].process.collapsed === true) {
-                            // Check if window is maximized
-                            let left = (wl[i].process.maximized === true)
-                                ? 0 : wl[i].process.settings.windowBox.left;
+        public appendMagnifyArea = (area: JQuery) => {
+            this.magnifyContainer.append(area);
+        };
 
-                            wl[i].template.animate({'left': left + 'px'}, 550);
-                            this.setActive(wl[i].pid);
-                        } else {
-                            let left = (wl[i].template.width() < 5000) ? wl[i].template.width() + 300 : 5000;
-                            wl[i].template.animate({'left': -left + 'px'}, 550);
-                        }
+        public checkPosition = (process: Application, mouseX: number, mouseY: number) => {
+            let magnification = null;
+            if (this.isLeft(mouseX) === true) {
+                magnification = 'left';
+            } else if (this.isRight(mouseX) === true) {
+                magnification = 'right';
+            } else if (this.isTop(mouseY) === true) {
+                magnification = 'top';
+            }
 
-                        wl[i].process.collapsed = !wl[i].process.collapsed;
-
-                        break;
-                    }
+            if (magnification !== null) {
+                if (magnification === 'left' || magnification === 'right') {
+                    let width = this.window.innerWidth / 2;
+                    let height = this.window.innerHeight;
+                    process.createMagnifyRegion(width, height, magnification, true);
+                } else {
+                    let width = this.window.innerWidth;
+                    let height = this.window.innerHeight;
+                    process.createMagnifyRegion(width, height, magnification, false);
                 }
             }
-        }
 
-        public maximizeWindow = (pid: number) => {
+            return magnification;
+        };
+
+        public maximizeWindow = (pid: number, top?: number, left?: number) => {
             let window = this.getWindow(pid);
             if (window !== null) {
                 if (window.process.maximized === true) {
                     window.process.maximized = false;
-                    window.template.animate({
-                        'height':  window.process.settings.windowBox.height  + 'px',
-                        'width': window.process.settings.windowBox.width + 'px',
-                        'top': window.process.settings.windowBox.top + 'px',
-                        'left': window.process.settings.windowBox.left + 'px'
-                    }, 550, () => {
-                        this._rootScope.$broadcast('WindowStateChanged', window.pid);
+                    snabbt(window.template, {
+                        'position': [window.process.settings.windowBox.left, window.process.settings.windowBox.top, 0],
+                        'height':  window.process.settings.windowBox.height,
+                        'fromHeight': this.document.innerHeight(),
+                        'width': window.process.settings.windowBox.width,
+                        'fromWidth': this.document.innerWidth(),
+                        'duration': 550,
+                        'allDone': () => {
+                            window.process.onResize();
+                            window.process.settings.windowBox.top = top;
+                            window.process.settings.windowBox.left = left;
+                        }
                     });
                     window.template.removeClass('maximized');
                 } else {
                     window.process.maximized = true;
-                    window.template.animate({
-                        'height': this._document.innerHeight() + 'px',
-                        'width' : this._document.innerWidth() + 'px',
-                        'top'   : '0',
-                        'left'  : '0'
-                    }, 550, () => {
-                        this._rootScope.$broadcast('WindowStateChanged', window.pid);
+                    snabbt(window.template, {
+                        'position': [-window.process.settings.windowBox.left, -window.process.settings.windowBox.top, 0],
+                        'fromHeight': window.process.settings.windowBox.height,
+                        'height':  this.document.innerHeight(),
+                        'fromWidth': window.process.settings.windowBox.width,
+                        'width': this.document.innerWidth(),
+                        'duration': 550,
+                        'allDone': () => {
+                            window.process.onResize();
+                        }
                     });
                     window.template.addClass('maximized');
                 }
@@ -89,12 +102,35 @@ module Kernel {
         public static Factory() {
             const factory = (
                 $document: ng.IDocumentService,
-                $rootScope: ng.IRootScopeService
-            ) => new WindowManager($document, $rootScope);
+                $rootScope: ng.IRootScopeService,
+                $window: ng.IWindowService
+            ) => new WindowManager($document, $rootScope, $window);
 
             return factory;
         }
 
+        public getWindowDimensions = () => {
+            return {
+                'width': this.window.innerWidth,
+                'height': this.window.innerHeight,
+            };
+        };
+
+        private isLeft = (x: number) => {
+            return x < 4;
+        };
+
+        private isRight = (x: number) => {
+            return x > this.window.innerWidth - 4;
+        };
+
+        private isBottom = (y: number) => {
+            return y > this.window.innerHeight - 4;
+        };
+
+        private isTop = (y: number) => {
+            return y < 4;
+        };
 
         get document():ng.IDocumentService {
             return this._document;

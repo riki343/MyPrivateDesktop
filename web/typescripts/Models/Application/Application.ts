@@ -16,6 +16,8 @@ module Kernel {
         private _isCursorModified: boolean;
         private _isResizing: boolean;
         private _resizeType: string;
+        private _isBeingMagnified: string;
+        private _magnifyRegion: JQuery;
 
         constructor(
             name: string, settings: ApplicationWindowSettings,
@@ -28,12 +30,37 @@ module Kernel {
             this._collapsed = false;
             this._maximized = false;
             this._active    = true;
+            this.isBeingMagnified = null;
             this.isCursorModified = false;
             this.isResizing = false;
+            this.magnifyRegion = null;
         }
 
-        public collapse   = () => { this.windowManager.collapseWindow(this.pid); };
-        public maximize   = () => { this.windowManager.maximizeWindow(this.pid); };
+        public collapse = () => {
+            let left = this.settings.windowBox.left + this.settings.windowBox.width;
+            if (this.collapsed === true) {
+                // Check if window is maximized
+                let left = (this.maximized === true)
+                    ? 0 : this.settings.windowBox.left;
+
+                snabbt(this.window, {
+                    'position': [left + 100, 0, 0],
+                    'duration': 550
+                });
+                this.windowManager.setActive(this.pid);
+            } else {
+                snabbt(this.window, {
+                    'position': [-left - 100, 0, 0],
+                    'duration': 550
+                });
+            }
+
+            this.collapsed = !this.collapsed;
+        };
+
+        public maximize = (top?: number, left?: number) => {
+            this.windowManager.maximizeWindow(this.pid, top, left);
+        };
         public makeActive = () => { this.windowManager.setActive(this.pid); };
 
         public onMouseDown = (e: DragEvent) => {
@@ -72,28 +99,29 @@ module Kernel {
                         this.isCursorModified = false;
                     }
                 } else if (this.isResizing === true) {
-                    console.log(this.resizeType);
                     if (this.resizeType === 'w-resize') { // left
                         let diffX = e.clientX - this.settings.windowBox.left;
                         this.settings.windowBox.left += diffX;
                         this.settings.windowBox.width -= diffX;
                         this.resizeWidth(this.settings.windowBox.left, this.settings.windowBox.width);
+                        this.onResize();
                     } else if (this.resizeType === 'e-resize') { // right
                         this.settings.windowBox.width +=
                             e.clientX - (this.settings.windowBox.left + this.settings.windowBox.width);
                         this.resizeWidth(this.settings.windowBox.left, this.settings.windowBox.width);
+                        this.onResize();
                     } else if (this.resizeType === 's-resize') { // bottom
                         this.settings.windowBox.height +=
                             e.clientY - (this.settings.windowBox.top + this.settings.windowBox.height);
                         this.resizeHeight(this.settings.windowBox.top, this.settings.windowBox.height);
+                        this.onResize();
                     } else if (this.resizeType === 'n-resize') { // top
                         let diffY = e.clientY - this.settings.windowBox.top;
                         this.settings.windowBox.top += diffY;
                         this.settings.windowBox.height -= diffY;
                         this.resizeHeight(this.settings.windowBox.top, this.settings.windowBox.height);
+                        this.onResize();
                     }
-
-                    this.windowManager.rootScope.$broadcast('WindowStateChanged', this);
                 }
             }
         };
@@ -133,7 +161,7 @@ module Kernel {
         };
 
         public onMouseMove = (e: DragEvent) => {
-            if (this.isDrags === true && e.which === 1) {
+            if (this.isDrags === true) {
                 this.settings.windowBox.left += e.pageX - this.prevX;
                 this.settings.windowBox.top  += e.pageY - this.prevY;
 
@@ -142,18 +170,94 @@ module Kernel {
 
                 this.prevX = e.pageX;
                 this.prevY = e.pageY;
+                if (this.windowManager.checkPosition(this, e.clientX, e.clientY) === null) {
+                    if (this.magnifyRegion !== null) {
+                        this.magnifyRegion.remove();
+                    }
+                    this.magnifyRegion = null;
+                    this.isBeingMagnified = null;
+                }
             }
         };
 
-        public onResize = (e, data) => {
-            if (data === this.pid) {
-                let view = this.window.find('div.application-window');
-                view.css('height', this.window.height() - 25 + 'px');
-            }
+        public onResize = () => {
+            let view = this.window.find('div.application-window');
+            view.css('height', this.window.height() - 25 + 'px');
         };
 
         public onMouseUp = (e: DragEvent) => {
+            if (this.isDrags === true && this.isBeingMagnified !== null) {
+                snabbt(this.magnifyRegion, {
+                    'opacityFrom': '0.4',
+                    'opacity': '0.0',
+                    'duration': 200,
+                    'allDone': () => {
+                        this.magnifyRegion.remove();
+                        this.magnifyRegion = null;
+                    }
+                });
+
+                if (this.isBeingMagnified === 'bottom' || this.isBeingMagnified === 'top') {
+                    this.maximize(50, 50);
+                } else {
+                    let dimensions = this.windowManager.getWindowDimensions();
+                    snabbt(this.window, {
+                        'position': [
+                            (this.isBeingMagnified === 'left')
+                                ? -this.settings.windowBox.left
+                                : -this.settings.windowBox.left + dimensions.width / 2,
+                            -this.settings.windowBox.top
+                        ],
+                        'fromHeight': this.settings.windowBox.height,
+                        'height': dimensions.height,
+                        'fromWidth': this.settings.windowBox.width,
+                        'width': dimensions.width / 2,
+                        'duration': 550,
+                        'allDone': () => {
+                            this.settings.windowBox.top = 0;
+                            if (this.isBeingMagnified === 'left') {
+                                this.settings.windowBox.left = 0;
+                            } else {
+                                this.settings.windowBox.left = dimensions.width / 2;
+                            }
+                        }
+                    });
+                }
+            }
             this.isDrags = false;
+     };
+
+        public createMagnifyRegion = (width: number, height: number, position: string, half: boolean) => {
+            if (this.magnifyRegion === null) {
+                let element = angular.element('<div></div>');
+                element.css('position', 'fixed');
+                element.css('z-index', '500');
+                element.css('opacity', '0.0');
+                element.css(position, '0');
+                element.css('top', '0');
+                element.css('background-color', 'orangered');
+                element.css('opacity', '0.4');
+                this.magnifyRegion = element;
+                this.windowManager.appendMagnifyArea(element);
+
+                if (half === true) {
+                    element.css('width', '0');
+                    element.css('height', height + 'px');
+                    snabbt(element, {
+                        fromOpacity: 0.0, opacity: 0.4,
+                        fromWidth: 0, width: width,
+                        duration: 400
+                    });
+                } else {
+                    element.css('height', '0');
+                    element.css('width', width + 'px');
+                    snabbt(element, {
+                        fromOpacity: 0.0, opacity: 0.4,
+                        fromHeight: 0, height: height,
+                        duration: 400
+                    });
+                }
+            }
         };
 
         private createTemplate = (settings: ApplicationWindowSettings): string => {
@@ -176,10 +280,12 @@ module Kernel {
         };
 
         public closeProcess = (): void => {
-            this.window.animate({
-                'height': '0px'
-            }, 450, 'linear', () => {
-                this.close();
+            snabbt(this.window, {
+                position: [-this.settings.windowBox.width - this.settings.windowBox.left - 100, 0, 0],
+                fromRotation: [0, 0, 2*Math.PI],
+                duration: 500,
+                'easing': 'easeIn',
+                'allDone': () => { this.close(); }
             });
         };
 
@@ -289,6 +395,23 @@ module Kernel {
 
         set resizeType(value:string) {
             this._resizeType = value;
+        }
+
+
+        get isBeingMagnified():string {
+            return this._isBeingMagnified;
+        }
+
+        set isBeingMagnified(value:string) {
+            this._isBeingMagnified = value;
+        }
+
+        get magnifyRegion():JQuery {
+            return this._magnifyRegion;
+        }
+
+        set magnifyRegion(value:JQuery) {
+            this._magnifyRegion = value;
         }
     }
 }
