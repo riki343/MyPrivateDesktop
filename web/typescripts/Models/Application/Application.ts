@@ -37,23 +37,29 @@ module Kernel {
         }
 
         public collapse = () => {
-            let left = this.settings.windowBox.left + this.settings.windowBox.width;
-            if (this.collapsed === true) {
-                // Check if window is maximized
-                let left = (this.maximized === true)
-                    ? 0 : this.settings.windowBox.left;
-
-                snabbt(this.window, {
-                    'position': [left + 100, 0, 0],
-                    'duration': 550
-                });
+            let left;
+            if (this.collapsed === false) {
                 this.windowManager.setActive(this.pid);
+                if (this.maximized === true) {
+                    let dimensions = this.windowManager.getWindowDimensions();
+                    left = -dimensions.width - 100;
+                } else {
+                    left = -this.settings.windowBox.left - this.settings.windowBox.width - 100;
+                }
             } else {
-                snabbt(this.window, {
-                    'position': [-left - 100, 0, 0],
-                    'duration': 550
-                });
+                left = 0;
             }
+
+            let top = 0;
+            if (this.maximized === true) {
+                top = -this.settings.windowBox.top;
+                left -= this.settings.windowBox.left;
+            }
+
+            snabbt(this.window, {
+                'position': [left, top, 0],
+                'duration': 550
+            });
 
             this.collapsed = !this.collapsed;
         };

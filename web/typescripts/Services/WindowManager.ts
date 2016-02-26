@@ -49,16 +49,18 @@ module Kernel {
                 if (window.process.maximized === true) {
                     window.process.maximized = false;
                     snabbt(window.template, {
-                        'position': [window.process.settings.windowBox.left, window.process.settings.windowBox.top, 0],
+                        'position': [0, 0, 0],
                         'height':  window.process.settings.windowBox.height,
                         'fromHeight': this.document.innerHeight(),
                         'width': window.process.settings.windowBox.width,
                         'fromWidth': this.document.innerWidth(),
                         'duration': 550,
                         'allDone': () => {
+                            if (angular.isDefined(top) && angular.isDefined(left)) {
+                                window.process.settings.windowBox.top = top;
+                                window.process.settings.windowBox.left = left;
+                            }
                             window.process.onResize();
-                            window.process.settings.windowBox.top = top;
-                            window.process.settings.windowBox.left = left;
                         }
                     });
                     window.template.removeClass('maximized');
