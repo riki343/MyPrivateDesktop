@@ -6,11 +6,8 @@
     ];
 
     function Controller($scope, $globalScope, desktopService) {
-        this.newBackgroundImage = null;
-
-        this.uploadFile = function () {
-            desktopService.changeBackground(this.newBackgroundImage);
+        this.uploadFile = function (file) {
+            desktopService.changeBackground(file);
         }.bind(this); // це шоб this був правильний
-
     }
 })(angular);
