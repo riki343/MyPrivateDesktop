@@ -100,23 +100,29 @@ var Kernel;
             _super.call(this, name, processManager);
             this.windowManager = windowManager;
             this.collapse = function () {
-                var left = _this.settings.windowBox.left + _this.settings.windowBox.width;
-                if (_this.collapsed === true) {
-                    // Check if window is maximized
-                    var left_1 = (_this.maximized === true)
-                        ? 0 : _this.settings.windowBox.left;
-                    snabbt(_this.window, {
-                        'position': [left_1 + 100, 0, 0],
-                        'duration': 550
-                    });
+                var left;
+                if (_this.collapsed === false) {
                     _this.windowManager.setActive(_this.pid);
+                    if (_this.maximized === true) {
+                        var dimensions = _this.windowManager.getWindowDimensions();
+                        left = -dimensions.width - 100;
+                    }
+                    else {
+                        left = -_this.settings.windowBox.left - _this.settings.windowBox.width - 100;
+                    }
                 }
                 else {
-                    snabbt(_this.window, {
-                        'position': [-left - 100, 0, 0],
-                        'duration': 550
-                    });
+                    left = 0;
                 }
+                var top = 0;
+                if (_this.maximized === true) {
+                    top = -_this.settings.windowBox.top;
+                    left -= _this.settings.windowBox.left;
+                }
+                snabbt(_this.window, {
+                    'position': [left, top, 0],
+                    'duration': 550
+                });
                 _this.collapsed = !_this.collapsed;
             };
             this.maximize = function (top, left) {
@@ -227,12 +233,12 @@ var Kernel;
                     _this.window.css('top', _this.settings.windowBox.top);
                     _this.prevX = e.pageX;
                     _this.prevY = e.pageY;
-                    if (_this.windowManager.checkPosition(_this, e.clientX, e.clientY) === null) {
+                    _this.isBeingMagnified = _this.windowManager.checkPosition(_this, e.clientX, e.clientY);
+                    if (_this.isBeingMagnified === null) {
                         if (_this.magnifyRegion !== null) {
                             _this.magnifyRegion.remove();
                         }
                         _this.magnifyRegion = null;
-                        _this.isBeingMagnified = null;
                     }
                 }
             };
@@ -251,33 +257,26 @@ var Kernel;
                             _this.magnifyRegion = null;
                         }
                     });
-                    if (_this.isBeingMagnified === 'bottom' || _this.isBeingMagnified === 'top') {
+                    if (_this.isBeingMagnified === 'top') {
                         _this.maximize(50, 50);
                     }
                     else {
                         var dimensions = _this.windowManager.getWindowDimensions();
-                        snabbt(_this.window, {
-                            'position': [
-                                (_this.isBeingMagnified === 'left')
-                                    ? -_this.settings.windowBox.left
-                                    : -_this.settings.windowBox.left + dimensions.width / 2,
-                                -_this.settings.windowBox.top
-                            ],
-                            'fromHeight': _this.settings.windowBox.height,
-                            'height': dimensions.height,
-                            'fromWidth': _this.settings.windowBox.width,
-                            'width': dimensions.width / 2,
-                            'duration': 550,
-                            'allDone': function () {
-                                _this.settings.windowBox.top = 0;
-                                if (_this.isBeingMagnified === 'left') {
-                                    _this.settings.windowBox.left = 0;
-                                }
-                                else {
-                                    _this.settings.windowBox.left = dimensions.width / 2;
-                                }
-                            }
-                        });
+                        _this.settings.windowBox.top = 0;
+                        if (_this.isBeingMagnified === 'left') {
+                            _this.settings.windowBox.left = 0;
+                        }
+                        else {
+                            _this.settings.windowBox.left = dimensions.width / 2;
+                        }
+                        _this.settings.windowBox.height = dimensions.height;
+                        _this.settings.windowBox.width = dimensions.width / 2;
+                        _this.window.animate({
+                            'top': _this.settings.windowBox.top,
+                            'left': _this.settings.windowBox.left,
+                            'height': _this.settings.windowBox.height,
+                            'width': _this.settings.windowBox.width
+                        }, 350);
                     }
                 }
                 _this.isDrags = false;
@@ -1326,6 +1325,7 @@ var Kernel;
                 $rootScope.makeActive = application.makeActive;
                 $rootScope.onMouseDownResize = application.onMouseDownResize;
                 application.$scope = $rootScope;
+                $rootScope.process = application;
             };
             // *************** EVENTS ***************
             this.onApplicationClosed = function (event, data) {
@@ -1445,33 +1445,29 @@ var Kernel;
                 if (window !== null) {
                     if (window.process.maximized === true) {
                         window.process.maximized = false;
-                        snabbt(window.template, {
-                            'position': [window.process.settings.windowBox.left, window.process.settings.windowBox.top, 0],
+                        window.template.animate({
                             'height': window.process.settings.windowBox.height,
-                            'fromHeight': _this.document.innerHeight(),
                             'width': window.process.settings.windowBox.width,
-                            'fromWidth': _this.document.innerWidth(),
-                            'duration': 550,
-                            'allDone': function () {
-                                window.process.onResize();
-                                window.process.settings.windowBox.top = top;
-                                window.process.settings.windowBox.left = left;
-                            }
+                            'top': window.process.settings.windowBox.top,
+                            'left': window.process.settings.windowBox.left,
+                        }, 550, function () {
+                            window.process.onResize();
                         });
                         window.template.removeClass('maximized');
                     }
                     else {
                         window.process.maximized = true;
-                        snabbt(window.template, {
-                            'position': [-window.process.settings.windowBox.left, -window.process.settings.windowBox.top, 0],
-                            'fromHeight': window.process.settings.windowBox.height,
-                            'height': _this.document.innerHeight(),
-                            'fromWidth': window.process.settings.windowBox.width,
+                        window.template.animate({
                             'width': _this.document.innerWidth(),
-                            'duration': 550,
-                            'allDone': function () {
-                                window.process.onResize();
+                            'height': _this.document.innerHeight(),
+                            'top': 0,
+                            'left': 0
+                        }, 550, function () {
+                            if (angular.isDefined(top) && angular.isDefined(left)) {
+                                window.process.settings.windowBox.top = top;
+                                window.process.settings.windowBox.left = left;
                             }
+                            window.process.onResize();
                         });
                         window.template.addClass('maximized');
                     }

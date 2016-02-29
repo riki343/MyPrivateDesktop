@@ -48,34 +48,28 @@ module Kernel {
             if (window !== null) {
                 if (window.process.maximized === true) {
                     window.process.maximized = false;
-                    snabbt(window.template, {
-                        'position': [0, 0, 0],
+                    window.template.animate({
                         'height':  window.process.settings.windowBox.height,
-                        'fromHeight': this.document.innerHeight(),
                         'width': window.process.settings.windowBox.width,
-                        'fromWidth': this.document.innerWidth(),
-                        'duration': 550,
-                        'allDone': () => {
-                            if (angular.isDefined(top) && angular.isDefined(left)) {
-                                window.process.settings.windowBox.top = top;
-                                window.process.settings.windowBox.left = left;
-                            }
-                            window.process.onResize();
-                        }
+                        'top': window.process.settings.windowBox.top,
+                        'left': window.process.settings.windowBox.left,
+                    }, 550, () => {
+                        window.process.onResize();
                     });
                     window.template.removeClass('maximized');
                 } else {
                     window.process.maximized = true;
-                    snabbt(window.template, {
-                        'position': [-window.process.settings.windowBox.left, -window.process.settings.windowBox.top, 0],
-                        'fromHeight': window.process.settings.windowBox.height,
-                        'height':  this.document.innerHeight(),
-                        'fromWidth': window.process.settings.windowBox.width,
+                    window.template.animate({
                         'width': this.document.innerWidth(),
-                        'duration': 550,
-                        'allDone': () => {
-                            window.process.onResize();
+                        'height':  this.document.innerHeight(),
+                        'top': 0,
+                        'left': 0
+                    }, 550, () => {
+                        if (angular.isDefined(top) && angular.isDefined(left)) {
+                            window.process.settings.windowBox.top = top;
+                            window.process.settings.windowBox.left = left;
                         }
+                        window.process.onResize();
                     });
                     window.template.addClass('maximized');
                 }

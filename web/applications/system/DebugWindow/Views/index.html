@@ -1,0 +1,14 @@
+<div ng-controller="debugWindowController as debug">
+    <pre>
+        Active: {{ debug.process.active | json }}
+        Is drags: {{ debug.process.isDrags | json }}
+        Is being magnified: {{ debug.process.isBeingMagnified | json }}
+        Collapsed: {{ debug.process.collapsed | json }}
+        Resize type: {{ debug.process.resizeType | json }}
+        Is maximized: {{ debug.process.maximized | json }}
+        top: {{ debug.process.settings.windowBox.top | json }}
+        left: {{ debug.process.settings.windowBox.left | json }}
+        width: {{ debug.process.settings.windowBox.width | json }}
+        height: {{ debug.process.settings.windowBox.height | json }}
+    </pre>
+</div>

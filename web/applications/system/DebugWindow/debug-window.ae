@@ -1,0 +1,34 @@
+{
+  "folder": "DebugWindow",
+  "module": {
+    "name": "debug-window",
+    "file": "debug-window.js"
+  },
+  "dependencies": [],
+  "javascript": [
+    {
+      "type": "controller",
+      "name": "debugWindowController",
+      "file": "Controllers/debug-window.controller.js"
+    }
+  ],
+  "stylesheet": [
+    {
+      "type": "stylesheet",
+      "name": "main.css",
+      "file": "Stylesheets/main.css"
+    }
+  ],
+  "resources": [],
+  "settings": {
+    "width": 640,
+    "height": 480,
+    "top": 50,
+    "left": 50
+  },
+  "info": {
+    "author": "",
+    "email": "",
+    "version": ""
+  }
+}

@@ -67,6 +67,7 @@ module Kernel {
         public maximize = (top?: number, left?: number) => {
             this.windowManager.maximizeWindow(this.pid, top, left);
         };
+
         public makeActive = () => { this.windowManager.setActive(this.pid); };
 
         public onMouseDown = (e: DragEvent) => {
@@ -105,23 +106,23 @@ module Kernel {
                         this.isCursorModified = false;
                     }
                 } else if (this.isResizing === true) {
-                    if (this.resizeType === 'w-resize') { // left
+                    if (this.resizeType === 'w-resize') { // left side
                         let diffX = e.clientX - this.settings.windowBox.left;
                         this.settings.windowBox.left += diffX;
                         this.settings.windowBox.width -= diffX;
                         this.resizeWidth(this.settings.windowBox.left, this.settings.windowBox.width);
                         this.onResize();
-                    } else if (this.resizeType === 'e-resize') { // right
+                    } else if (this.resizeType === 'e-resize') { // right side
                         this.settings.windowBox.width +=
                             e.clientX - (this.settings.windowBox.left + this.settings.windowBox.width);
                         this.resizeWidth(this.settings.windowBox.left, this.settings.windowBox.width);
                         this.onResize();
-                    } else if (this.resizeType === 's-resize') { // bottom
+                    } else if (this.resizeType === 's-resize') { // bottom side
                         this.settings.windowBox.height +=
                             e.clientY - (this.settings.windowBox.top + this.settings.windowBox.height);
                         this.resizeHeight(this.settings.windowBox.top, this.settings.windowBox.height);
                         this.onResize();
-                    } else if (this.resizeType === 'n-resize') { // top
+                    } else if (this.resizeType === 'n-resize') { // top side
                         let diffY = e.clientY - this.settings.windowBox.top;
                         this.settings.windowBox.top += diffY;
                         this.settings.windowBox.height -= diffY;
@@ -176,12 +177,12 @@ module Kernel {
 
                 this.prevX = e.pageX;
                 this.prevY = e.pageY;
-                if (this.windowManager.checkPosition(this, e.clientX, e.clientY) === null) {
+                this.isBeingMagnified = this.windowManager.checkPosition(this, e.clientX, e.clientY);
+                if (this.isBeingMagnified === null) {
                     if (this.magnifyRegion !== null) {
                         this.magnifyRegion.remove();
                     }
                     this.magnifyRegion = null;
-                    this.isBeingMagnified = null;
                 }
             }
         };
@@ -203,33 +204,29 @@ module Kernel {
                     }
                 });
 
-                if (this.isBeingMagnified === 'bottom' || this.isBeingMagnified === 'top') {
+                if (this.isBeingMagnified === 'top') {
                     this.maximize(50, 50);
                 } else {
                     let dimensions = this.windowManager.getWindowDimensions();
-                    snabbt(this.window, {
-                        'position': [
-                            (this.isBeingMagnified === 'left')
-                                ? -this.settings.windowBox.left
-                                : -this.settings.windowBox.left + dimensions.width / 2,
-                            -this.settings.windowBox.top
-                        ],
-                        'fromHeight': this.settings.windowBox.height,
-                        'height': dimensions.height,
-                        'fromWidth': this.settings.windowBox.width,
-                        'width': dimensions.width / 2,
-                        'duration': 550,
-                        'allDone': () => {
-                            this.settings.windowBox.top = 0;
-                            if (this.isBeingMagnified === 'left') {
-                                this.settings.windowBox.left = 0;
-                            } else {
-                                this.settings.windowBox.left = dimensions.width / 2;
-                            }
-                        }
-                    });
+                    this.settings.windowBox.top = 0;
+                    if (this.isBeingMagnified === 'left') {
+                        this.settings.windowBox.left = 0;
+                    } else {
+                        this.settings.windowBox.left = dimensions.width / 2;
+                    }
+
+                    this.settings.windowBox.height = dimensions.height;
+                    this.settings.windowBox.width = dimensions.width / 2;
+
+                    this.window.animate({
+                        'top': this.settings.windowBox.top,
+                        'left': this.settings.windowBox.left,
+                        'height': this.settings.windowBox.height,
+                        'width': this.settings.windowBox.width
+                    }, 350);
                 }
             }
+
             this.isDrags = false;
      };
 

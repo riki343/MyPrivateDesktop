@@ -9,6 +9,7 @@ use riki34\BackendBundle\Constants\ServerConstants;
 use riki34\BackendBundle\Interfaces\JsonEntity;
 use riki34\BackendBundle\Utils\JsonTransformer;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
  * UserDirectory
@@ -152,6 +153,43 @@ class UserDirectory implements JsonEntity
             'created' => $this->created->format(\DateTime::ISO8601),
             'updated' => $this->updated->format(\DateTime::ISO8601),
         ];
+    }
+
+    /**
+     * @param UploadedFile $file
+     * @return UserFile
+     */
+    public function uploadFile($file) {
+        $exist = $this->checkFileName($file->getClientOriginalName());
+
+        if ($exist === true) {
+            $counter = 1;
+            do {
+                $filenameArray = explode('.', $file->getClientOriginalName());
+                $filename = $filenameArray[count($filenameArray) - 2] + $counter++;
+                $filenameArray[count($filenameArray) - 2] = $filename;
+                $filename = implode('.', $filenameArray);
+            } while ($this->checkFileName($filename) === true);
+        } else {
+            $filename = $file->getClientOriginalName();
+        }
+
+        $file->move($this->getFullInArray(), $filename);
+        $file = new UserFile($filename, null, $this);
+
+        return $file;
+    }
+
+    private function checkFileName($filename) {
+        $existing = false;
+        /** @var UserFile $file */
+        foreach ($this->getFiles() as $file) {
+            if ($file->getName() === $filename) {
+                $existing = true; break;
+            }
+        }
+
+        return $existing;
     }
 
 

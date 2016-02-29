@@ -123,6 +123,7 @@ module Kernel {
             $rootScope.makeActive = application.makeActive;
             $rootScope.onMouseDownResize = application.onMouseDownResize;
             application.$scope = $rootScope;
+            $rootScope.process = application;
         };
 
 

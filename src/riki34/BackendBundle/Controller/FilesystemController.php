@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -97,6 +98,40 @@ class FilesystemController extends Controller
 
     public function deleteFile() {
         // TODO: implement function deleteFile()
+    }
+
+    /**
+     * @Route("/file/{dir_id}", name="fs.file.upload")
+     * @Method({"POST"})
+     * @param Request $request
+     * @param integer $dir_id
+     * @return JsonResponse
+     */
+    public function uploadFile(Request $request, $dir_id) {
+        /** @var EntityManager $em */
+        $em = $this->getDoctrine()->getManager();
+        $user = $em->getRepository('riki34BackendBundle:User')->findOneBy(['username' => 'test']);
+        $directory = $em->find('riki34BackendBundle:UserDirectory', $dir_id);
+
+        // If directory not found then return error
+        if ($directory === null) {
+            $message = $this->get('translator')->trans('fs.error.directory404', [], 'fs');
+            return new JsonResponse(['error' => $message], 404);
+        }
+
+        $files = $request->files->all();
+        /** @var UploadedFile $file */
+        foreach ($files as $file) {
+            $uploadedFile = $directory->uploadFile($file);
+            $uploadedFile->setUser($user);
+            $uploadedFile->setUserId($user->getId());
+            $em->persist($uploadedFile);
+        }
+
+        $em->flush();
+
+        $message = $this->get('translator')->trans('fs.files.uploaded', [], 'fs');
+        return new JsonResponse(['success' => $message], 201);
     }
 
     /**
