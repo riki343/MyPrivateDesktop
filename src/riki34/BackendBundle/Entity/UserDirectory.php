@@ -161,11 +161,10 @@ class UserDirectory implements JsonEntity
      */
     public function uploadFile($file) {
         $exist = $this->checkFileName($file->getClientOriginalName());
-
+        $filenameArray = explode('.', $file->getClientOriginalName());
         if ($exist === true) {
             $counter = 1;
             do {
-                $filenameArray = explode('.', $file->getClientOriginalName());
                 $filename = $filenameArray[count($filenameArray) - 2] + $counter++;
                 $filenameArray[count($filenameArray) - 2] = $filename;
                 $filename = implode('.', $filenameArray);
@@ -173,8 +172,8 @@ class UserDirectory implements JsonEntity
         } else {
             $filename = $file->getClientOriginalName();
         }
-
-        $file->move($this->getFullInArray(), $filename);
+        $Arr = $this->getFullInArray();
+        $file->move($Arr['path'], $filename);
         $file = new UserFile($filename, null, $this);
 
         return $file;

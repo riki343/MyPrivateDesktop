@@ -118,7 +118,6 @@ class FilesystemController extends Controller
             $message = $this->get('translator')->trans('fs.error.directory404', [], 'fs');
             return new JsonResponse(['error' => $message], 404);
         }
-
         $files = $request->files->all();
         /** @var UploadedFile $file */
         foreach ($files as $file) {

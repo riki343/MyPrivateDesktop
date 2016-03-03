@@ -115,7 +115,7 @@ class UserFile implements JsonEntity
         $this->name = $name;
         $this->setUser($user);
         $this->setDirectory($directory);
-        if ($user !== null && $name !== null && $directory !== null) {
+        if ($name !== null && $directory !== null) {
             $filename = explode('.', $name);
             $this->extension = (count($filename) > 1) ? $filename[count($filename) - 1] : null;
             $filePath = sprintf('%s/%s', $directory->getFullPath(), $name);

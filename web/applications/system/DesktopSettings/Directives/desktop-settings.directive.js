@@ -19,7 +19,7 @@
 
         function Link($scope, $element, $attr) {
             $element.bind('change', function(){
-                $scope.uploadFile({'file': $element[0].files[0]});
+                $scope.uploadFile({'file': $element[0].files});
             }.bind(this));
         }
     }

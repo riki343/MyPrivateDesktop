@@ -1140,6 +1140,27 @@ var Kernel;
                 'name': dir
             });
         };
+        FilesystemService.prototype.uploadFiles = function (files) {
+            var formData = new FormData();
+            for (var i = 0; i < files.length; i++) {
+                formData.append("file[" + i + "]", files[i]);
+            }
+            var promise = this.http.post('/api/filesystem/file/' + 1, formData, {
+                'transformRequest': angular.identity,
+                'headers': { 'Content-Type': undefined }
+            });
+            promise.success(function (response) {
+                console.log("Good");
+            });
+            return this.handlePromise(promise);
+        };
+        FilesystemService.prototype.handlePromise = function (promise) {
+            var defer = this.q.defer();
+            promise.success(function (response) {
+                defer.resolve(response);
+            });
+            return defer.promise;
+        };
         FilesystemService.prototype.rmDir = function (dir) {
             return this.createPromise(dir);
         };

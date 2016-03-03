@@ -16,7 +16,8 @@
                                 </div>
                                 <div class="col-xs-4">
                                     <div class="checkbox">
-                                        <label><input type="checkbox" value="">Upload and setup</label>
+                                        <label><input type="checkbox" value="" ng-model="settings.checkBoxModel"
+                                                      ng-true-value="true" ng-false-value="false">Upload and setup</label>
                                     </div>
                                 </div>
                                 <div class="col-xs-4">
@@ -31,11 +32,6 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <!--<div class="btn-group">
-                                <input class="btn" type="file" desktop-settings file-model="settings.newBackgroundImage"/>
-                                <button class="btn btn-primary" ng-click="settings.uploadFile()">upload</button>
-                            </div>-->
                             <div class="input-group">
                                 <span class="input-group-btn">
                                     <span class="btn btn-success btn-file">
@@ -43,9 +39,7 @@
                                     </span>
                                 </span>
                             </div>
-                            <div class="block" style="padding: 10%; background-color: #636363">
-                                <p>Gallery</p>
-                            </div>
+                            <desktop-settings-gallery></desktop-settings-gallery>
                         </div>
                         <div class="tab-pane" id="tab2"></div>
                         <div class="tab-pane" id="tab3"></div>

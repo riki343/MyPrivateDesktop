@@ -16,7 +16,11 @@
       "type": "directive",
       "name": "desktopSettingsDirective",
       "file": "Directives/desktop-settings.directive.js"
-    }
+    }, {
+      "type": "directive",
+      "name": "desktopSettingsGalleryDirective",
+      "file": "Directives/desktop-settings-gallery.directive.js"
+         }
   ],
   "stylesheet": [
     {

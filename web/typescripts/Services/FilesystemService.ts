@@ -23,6 +23,35 @@ module Kernel {
             });
         }
 
+        public uploadFiles(files: FileList) {
+            let formData = new FormData();
+            for (var i = 0; i < files.length; i++) {
+                formData.append("file[" + i + "]", files[i]);
+            }
+            let promise = this.http.post(
+                '/api/filesystem/file/' + 1,
+                formData, {
+                    'transformRequest': angular.identity,
+                    'headers': {'Content-Type': undefined}
+                }
+            );
+
+            promise.success((response: any) => {
+                console.log("Good");
+            });
+
+            return this.handlePromise(promise);
+        }
+
+        private handlePromise(promise) {
+            var defer = this.q.defer();
+            promise.success(function (response) {
+                defer.resolve(response);
+            });
+
+            return defer.promise;
+        }
+
         public rmDir(dir) {
             return this.createPromise(dir);
         }
