@@ -225,10 +225,13 @@ module Kernel {
                         'width': this.settings.windowBox.width
                     }, 350);
                 }
+
+                this.isBeingMagnified = null;
             }
 
             this.isDrags = false;
-     };
+            this.isResizing = false;
+        };
 
         public createMagnifyRegion = (width: number, height: number, position: string, half: boolean) => {
             if (this.magnifyRegion === null) {
