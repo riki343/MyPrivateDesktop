@@ -201,3 +201,14 @@ body {
 }
 
 #magnify-container {}
+
+.desktop-grid-selection {
+    background-color: green;
+    opacity: 0.3;
+    position: absolute;
+    width: 0;
+    height: 0;
+    border: solid darkgreen 2px;
+    box-sizing: border-box;
+    display: none;
+}

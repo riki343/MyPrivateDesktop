@@ -1,0 +1,35 @@
+module Kernel {
+    export class Point {
+        private _x: number;
+        private _y: number;
+
+        constructor(x?: number, y?: number) {
+            this._x = x;
+            this._y = y;
+        }
+
+        public distanceToCoords (x: number, y: number): Distance {
+            return new Distance(Math.abs(this.x - x), Math.abs(this.y - y));
+        }
+
+        public distanceToPoint (point: Point): Distance {
+            return new Distance(Math.abs(this.x - point.x), Math.abs(this.y - point.y));
+        }
+
+        get x():number {
+            return this._x;
+        }
+
+        set x(value:number) {
+            this._x = value;
+        }
+
+        get y():number {
+            return this._y;
+        }
+
+        set y(value:number) {
+            this._y = value;
+        }
+    }
+}

@@ -1,4 +1,72 @@
 /// <reference path='interfaces.d.ts' />
+var Kernel;
+(function (Kernel) {
+    var Distance = (function () {
+        function Distance(width, height) {
+            this._width = width;
+            this._height = height;
+        }
+        Object.defineProperty(Distance.prototype, "width", {
+            get: function () {
+                return this._width;
+            },
+            set: function (value) {
+                this._width = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Distance.prototype, "height", {
+            get: function () {
+                return this._height;
+            },
+            set: function (value) {
+                this._height = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return Distance;
+    })();
+    Kernel.Distance = Distance;
+})(Kernel || (Kernel = {}));
+var Kernel;
+(function (Kernel) {
+    var Point = (function () {
+        function Point(x, y) {
+            this._x = x;
+            this._y = y;
+        }
+        Point.prototype.distanceToCoords = function (x, y) {
+            return new Kernel.Distance(Math.abs(this.x - x), Math.abs(this.y - y));
+        };
+        Point.prototype.distanceToPoint = function (point) {
+            return new Kernel.Distance(Math.abs(this.x - point.x), Math.abs(this.y - point.y));
+        };
+        Object.defineProperty(Point.prototype, "x", {
+            get: function () {
+                return this._x;
+            },
+            set: function (value) {
+                this._x = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Point.prototype, "y", {
+            get: function () {
+                return this._y;
+            },
+            set: function (value) {
+                this._y = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return Point;
+    })();
+    Kernel.Point = Point;
+})(Kernel || (Kernel = {}));
 /// <reference path='../models.d.ts' />
 var Kernel;
 (function (Kernel) {
@@ -924,6 +992,48 @@ var Kernel;
     })();
     Kernel.DesktopGrid = DesktopGrid;
 })(Kernel || (Kernel = {}));
+var Kernel;
+(function (Kernel) {
+    var DesktopGridSelection = (function () {
+        function DesktopGridSelection(from, to, distance) {
+            this._from = from;
+            this._to = to;
+            this._distance = distance;
+        }
+        Object.defineProperty(DesktopGridSelection.prototype, "from", {
+            get: function () {
+                return this._from;
+            },
+            set: function (value) {
+                this._from = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DesktopGridSelection.prototype, "to", {
+            get: function () {
+                return this._to;
+            },
+            set: function (value) {
+                this._to = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DesktopGridSelection.prototype, "distance", {
+            get: function () {
+                return this._distance;
+            },
+            set: function (value) {
+                this._distance = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return DesktopGridSelection;
+    })();
+    Kernel.DesktopGridSelection = DesktopGridSelection;
+})(Kernel || (Kernel = {}));
 /// <reference path='../models.d.ts' />
 var Kernel;
 (function (Kernel) {
@@ -1763,6 +1873,44 @@ var Kernel;
             this.scope = true;
             this.controller = 'DesktopGridDirectiveController';
             this.controllerAs = 'controller';
+            this.link = function ($scope, $element) {
+                $scope.selectionInProgress = false;
+                $scope.selectionArea = new Kernel.DesktopGridSelection();
+                $scope.DOM = $element.find('div.desktop-grid-selection');
+                $scope.mouseDown = function (event) {
+                    $scope.selectionArea.from = new Kernel.Point(event.clientX, event.clientY);
+                    $scope.selectionInProgress = true;
+                    $scope.DOM.css('display', 'block');
+                };
+                $scope.mouseMove = function (event) {
+                    if (event.clientX < 0 || event.clientY < 0 || $scope.selectionInProgress === false) {
+                        return;
+                    }
+                    var point = new Kernel.Point(event.clientX, event.clientY);
+                    $scope.selectionArea.distance = $scope.selectionArea.from.distanceToPoint(point);
+                    $scope.selectionArea.to = point;
+                    if ($scope.selectionArea.from.x < $scope.selectionArea.to.x) {
+                        $scope.DOM.css('left', $scope.selectionArea.from.x + 'px');
+                    }
+                    else {
+                        $scope.DOM.css('left', $scope.selectionArea.to.x + 'px');
+                    }
+                    if ($scope.selectionArea.from.y < $scope.selectionArea.to.y) {
+                        $scope.DOM.css('top', $scope.selectionArea.from.y + 'px');
+                    }
+                    else {
+                        $scope.DOM.css('top', $scope.selectionArea.to.y + 'px');
+                    }
+                    $scope.DOM.css('width', $scope.selectionArea.distance.width + 'px');
+                    $scope.DOM.css('height', $scope.selectionArea.distance.height + 'px');
+                };
+                $scope.mouseUp = function (event) {
+                    $scope.DOM.css('width', '0px');
+                    $scope.DOM.css('height', '0px');
+                    $scope.DOM.css('display', 'none');
+                    $scope.selectionInProgress = false;
+                };
+            };
         }
         DesktopGridDirective.Factory = function () {
             var factory = function () { return new DesktopGridDirective(); };
