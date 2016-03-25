@@ -27,19 +27,17 @@
                                             <span class="caret"></span>
                                         </button>
                                         <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-                                            //dirs
+                                            root
                                         </ul>
                                     </div>
                                 </div>
                             </div>
                             <div class="input-group">
-                                <span class="input-group-btn">
-                                    <span class="btn btn-success btn-file">
+                                    <button class="btn btn-success btn-file">
                                         Browse&hellip; <input type="file" on-file-changed="settings.uploadFile(file)" multiple desktop-settings="settings.uploadFile">
-                                    </span>
-                                </span>
+                                    </button>
                             </div>
-                            <desktop-settings-gallery></desktop-settings-gallery>
+                            <desktop-settings-gallery api="settings.galleryAPI"></desktop-settings-gallery>
                         </div>
                         <div class="tab-pane" id="tab2"></div>
                         <div class="tab-pane" id="tab3"></div>

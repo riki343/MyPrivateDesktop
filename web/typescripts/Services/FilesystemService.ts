@@ -26,7 +26,7 @@ module Kernel {
         public uploadFiles(files: FileList) {
             let formData = new FormData();
             for (var i = 0; i < files.length; i++) {
-                formData.append("file[" + i + "]", files[i]);
+                formData.append("file" + i, files[i]);
             }
             let promise = this.http.post(
                 '/api/filesystem/file/' + 1,
@@ -35,12 +35,7 @@ module Kernel {
                     'headers': {'Content-Type': undefined}
                 }
             );
-
-            promise.success((response: any) => {
-                console.log("Good");
-            });
-
-            return this.handlePromise(promise);
+            return promise;
         }
 
         private handlePromise(promise) {

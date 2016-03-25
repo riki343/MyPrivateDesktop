@@ -1305,16 +1305,13 @@ var Kernel;
         FilesystemService.prototype.uploadFiles = function (files) {
             var formData = new FormData();
             for (var i = 0; i < files.length; i++) {
-                formData.append("file[" + i + "]", files[i]);
+                formData.append("file" + i, files[i]);
             }
             var promise = this.http.post('/api/filesystem/file/' + 1, formData, {
                 'transformRequest': angular.identity,
                 'headers': { 'Content-Type': undefined }
             });
-            promise.success(function (response) {
-                console.log("Good");
-            });
-            return this.handlePromise(promise);
+            return promise;
         };
         FilesystemService.prototype.handlePromise = function (promise) {
             var defer = this.q.defer();
@@ -1382,6 +1379,13 @@ var Kernel;
                     'transformRequest': angular.identity,
                     'headers': { 'Content-Type': undefined }
                 });
+                promise.success(function (response) {
+                    _this.rootScope.$broadcast('DesktopImageChanged', response.image);
+                });
+                return _this.handlePromise(promise);
+            };
+            this.changeBckFromGallery = function (imgId) {
+                var promise = _this.http.get(Routing.generate('select-background-from-gallery', { 'img_id': imgId, 'desktop_id': _this.desktopID }));
                 promise.success(function (response) {
                     _this.rootScope.$broadcast('DesktopImageChanged', response.image);
                 });
@@ -2001,7 +2005,7 @@ var Kernel;
         return $window.superScope;
     }
     run.$inject = ['$globalScope'];
-    function run($globalScope) { }
+    function run($globalScope) { } // Hack to instantiate $globalScope service
 })(Kernel || (Kernel = {}));
 /// <reference path='typings/tsd.d.ts' />
 /// <reference path='Declarations/declarations.d.ts' />

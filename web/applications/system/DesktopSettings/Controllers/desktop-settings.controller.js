@@ -6,11 +6,16 @@
     ];
 
     function Controller($scope, $globalScope, desktopService, fs) {
+        this.galleryAPI = {};
+        var self = this;
         this.uploadFile = function (files) {
             if(this.checkBoxModel){
                 desktopService.changeBackground(files[0]);
             } else{
-                fs.uploadFiles(files);
+                var promise = fs.uploadFiles(files);
+                promise.success(function(response){
+                    self.galleryAPI.refreshGallery();
+                });
             }
         }.bind(this);
 

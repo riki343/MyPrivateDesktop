@@ -130,7 +130,7 @@ class FilesystemController extends Controller
         $em->flush();
 
         $message = $this->get('translator')->trans('fs.files.uploaded', [], 'fs');
-        return new JsonResponse(['success' => $message], 201);
+        return new JsonResponse(['success' => $message], 200);
     }
 
     /**

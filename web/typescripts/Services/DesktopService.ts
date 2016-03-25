@@ -52,6 +52,16 @@ module Kernel {
             return this.handlePromise(promise);
         };
 
+        public changeBckFromGallery = (imgId: Number) => {
+            let promise = this.http.get(Routing.generate('select-background-from-gallery', { 'img_id': imgId, 'desktop_id': this.desktopID }));
+
+            promise.success((response: any) => {
+                this.rootScope.$broadcast('DesktopImageChanged', response.image);
+            });
+
+            return this.handlePromise(promise);
+        };
+
         private handlePromise(promise) {
             var defer = this.q.defer();
             promise.success(function (response) {

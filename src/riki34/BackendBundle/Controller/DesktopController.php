@@ -5,6 +5,8 @@ namespace riki34\BackendBundle\Controller;
 use Doctrine\ORM\EntityManager;
 use riki34\BackendBundle\Constants\ServerConstants;
 use riki34\BackendBundle\Entity\User;
+use riki34\BackendBundle\Entity\UserFile;
+use riki34\BackendBundle\Entity\DesktopSettings;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -125,6 +127,41 @@ class DesktopController extends Controller {
 
         $user = $em->getRepository('riki34BackendBundle:User')->findOneBy(['username' => 'test']);
         $settings->uploadImage($uploaded, $user);
+        $em->persist($settings);
+        $em->flush();
+
+        return new JsonResponse(['image' => ServerConstants::WEB_DIR . $settings->getBackgroundImage()], 200);
+    }
+
+    /**
+     * @Route("/{desktop_id}/settings/select-background-from-gallery/{img_id}", name="select-background-from-gallery")
+     * @Method({"GET"})
+     * @param Request $request
+     * @param integer $desktop_id
+     * @param integer $img_id
+     * @return JsonResponse
+     */
+    public function changeBckFromGallery(Request $request, $desktop_id, $img_id) {
+
+        /** @var EntityManager $em */
+        $em = $this->getDoctrine()->getManager();
+        /** @var DesktopSettings $settings */
+        $settings = $em->getRepository('riki34BackendBundle:DesktopSettings')->findOneBy(['desktopId' => $desktop_id]);
+        // If settings entity was not found then return error
+        if ($settings === null) {
+            $message = $this->get('translator')->trans('desktop404', [], 'desktop');
+            return new JsonResponse(['error' => $message], 404);
+        }
+        /** @var UserFile $img */
+        $img = $em->getRepository('riki34BackendBundle:UserFile')->findOneBy(['id' => $img_id]);
+        if ($img === null) {
+            $message = $this->get('translator')->trans('img404', [], 'desktop');
+            return new JsonResponse(['error' => $message], 404);
+        }
+        /** @var User $user */
+        $user = $em->getRepository('riki34BackendBundle:User')->findOneBy(['username' => 'test']);
+        $settings->changeBckImage($img, $user);
+        //return new JsonResponse(['msg' => "good"], 200);
         $em->persist($settings);
         $em->flush();
 

@@ -22,12 +22,12 @@ module Kernel {
         .controller('DesktopDirectiveController', DesktopDirectiveController)
         .controller('DesktopPanelDirectiveController', DesktopPanelDirectiveController)
         .controller('DesktopGridDirectiveController', DesktopGridDirectiveController)
-        .controller('ApplicationsMenuController', ApplicationsMenuController)
+        //.controller('ApplicationsMenuController', ApplicationsMenuController)
 
         .directive('desktop', DesktopDirective.Factory())
         .directive('desktopGrid', DesktopGridDirective.Factory())
         .directive('desktopPanel', DesktopPanelDirective.Factory())
-        .directive('applicationsMenu', ApplicationsMenuDirective.Factory())
+        //.directive('applicationsMenu', ApplicationsMenuDirective.Factory())
         .run(run)
     ;
 

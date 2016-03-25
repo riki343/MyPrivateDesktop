@@ -131,6 +131,7 @@ class UserFile implements JsonEntity
             'name' => $this->name,
             'extension' => $this->extension,
             'path' => $this->getFullPath(),
+            'webPath' => $this->getWebPath(),
             'userID' => $this->userId,
             'created' => $this->created->format(\DateTime::ISO8601),
             'updated' => $this->updated->format(\DateTime::ISO8601),
@@ -144,6 +145,7 @@ class UserFile implements JsonEntity
             'name' => $this->name,
             'extension' => $this->extension,
             'path' => $this->getFullPath(),
+            'webPath' => $this->getWebPath(),
             'userID' => $this->userId,
             'created' => $this->created->format(\DateTime::ISO8601),
             'updated' => $this->updated->format(\DateTime::ISO8601),
@@ -380,6 +382,10 @@ class UserFile implements JsonEntity
 
     public function getFullPath() {
         return ServerConstants::FILESYSTEM_BASE_DIR . $this->path;
+    }
+
+    public function getWebPath() {
+        return ServerConstants::FILESYSTEM_WEB_DIR . $this->path;
     }
 
     /**

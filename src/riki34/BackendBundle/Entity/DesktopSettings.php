@@ -8,6 +8,7 @@ use riki34\BackendBundle\Constants\ServerConstants;
 use riki34\BackendBundle\Interfaces\JsonEntity;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use riki34\BackendBundle\Entity\UserFile;
 
 /**
  * DesktopSettings
@@ -105,6 +106,19 @@ class DesktopSettings implements JsonEntity
 
         $image->move($apppath . $webpath, $image->getClientOriginalName());
         $this->setBackgroundImage($webpath . $image->getClientOriginalName());
+
+        return $this;
+    }
+
+    public function changeBckImage(UserFile $image, User $user) {
+        $webpath  =  '/files/resources/desktop-images/' . $user->getUsername() . '/';
+        $apppath = __DIR__ . '/../../../../web';
+        $fs = new Filesystem();
+        if ($this->getBackgroundImage() !== ServerConstants::DEFAULT_BACKGROUND_IMAGE) {
+            $fs->remove($apppath . $this->getBackgroundImage());
+        }
+        $fs->copy($apppath . $image->getWebPath(), $apppath . $webpath . $image->getName());
+        $this->setBackgroundImage($webpath . $image->getName());
 
         return $this;
     }
