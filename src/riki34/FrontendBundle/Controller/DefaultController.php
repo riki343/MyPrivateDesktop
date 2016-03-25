@@ -5,6 +5,7 @@ namespace riki34\FrontendBundle\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class DefaultController
@@ -38,5 +39,14 @@ class DefaultController extends Controller
         return $this->render('@riki34Frontend/desktop.html.twig', [
             'desktop_id' => 1
         ]);
+    }
+
+    /**
+     * @Route("/test")
+     * @Method({"GET"})
+     * @return Response
+     */
+    public function testAction() {
+        return $this->render('@riki34Frontend/test.html.twig');
     }
 }

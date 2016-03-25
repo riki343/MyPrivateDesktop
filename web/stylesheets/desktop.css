@@ -212,3 +212,12 @@ body {
     box-sizing: border-box;
     display: none;
 }
+
+.applications-menu {
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    background-color: rgba(46, 46, 46, 0.71);
+    z-index: 9999999;
+}

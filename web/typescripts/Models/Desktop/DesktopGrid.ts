@@ -26,7 +26,6 @@ module Kernel{
                     this.rows.push(array);
                 }
             }
-
         }
 
 

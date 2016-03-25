@@ -1,4 +1,5 @@
 /// <reference path='../all.ts' />
+/// <reference path='Basic/UniqueList.ts' />
 /// <reference path='Basic/Distance.ts' />
 /// <reference path='Basic/Point.ts' />
 /// <reference path='System/ProcessListItem.ts' />

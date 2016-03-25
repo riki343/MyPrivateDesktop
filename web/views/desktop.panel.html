@@ -2,6 +2,9 @@
     <div ng-show="menuVisible" class="desktop-panel-menu show-hide-animation"></div>
     <button ng-click="menuVisible = !menuVisible;" class="desktop-panel-start-button">Start!</button>
 
+    <!-- TODO: implement on-ready -->
+    <applications-menu on-ready=""></applications-menu>
+
     <ul class="desktop-panel-applications-list">
         <li ng-repeat="app in panel.windowList"
             class="desktop-panel-applications-list-item"

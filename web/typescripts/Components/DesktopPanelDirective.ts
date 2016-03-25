@@ -13,12 +13,10 @@ module Kernel {
         public controller = 'DesktopPanelDirectiveController';
         public controllerAs = 'panel';
 
-        public static $inject = ['$window', '$document'];
-
-        constructor(private window: ng.IWindowService, private document: any) {}
+        public static $inject = [];
+        constructor() {}
 
         public link = ($scope: iDesktopPanelDirectiveScope, $element: ng.IRootElementService) => {
-            let window = this.window;
             if (!$scope.settings) {
                 $scope.settings = {
                     'height': '30px',
@@ -29,40 +27,21 @@ module Kernel {
                     'left': '0'
                 };
             }
-
-            $scope.menuPanel = $element.find('div.desktop-panel-menu');
-            let panelBottom = parseInt($scope.settings.height.replace('px', '')) + 3;
-            $scope.menuPanel.css('bottom', panelBottom + 'px');
-
-            $scope.menuVisible = false;
-
-            let resizePanelMenu = () => {
-                $scope.menuPanel.css('height', (window.innerHeight / 2) + 'px');
-                $scope.menuPanel.css('width', (window.innerWidth * 0.35) + 'px');
-            };
-
-            let $window = angular.element(this.window);
-            $window.on('resize', resizePanelMenu);
-
-            resizePanelMenu();
         };
 
         public static Factory() {
-            const directive = (
-                $window: ng.IWindowService, $document: ng.IDocumentService
-            ) => new DesktopPanelDirective($window, $document);
+            const directive = () => new DesktopPanelDirective();
 
             return directive;
         }
     }
 
     export class DesktopPanelDirectiveController extends WindowContainer{
-        public static $inject = ['$rootScope', 'windowManagerService', '$scope', '$timeout'];
+        public static $inject = ['$rootScope', 'windowManagerService', '$timeout'];
 
         constructor(
             private rootScope: ng.IRootScopeService,
             private windowManager: WindowManager,
-            private scope: any,
             private timeout: ng.ITimeoutService
         ) {
             super();

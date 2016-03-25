@@ -22,10 +22,12 @@ module Kernel {
         .controller('DesktopDirectiveController', DesktopDirectiveController)
         .controller('DesktopPanelDirectiveController', DesktopPanelDirectiveController)
         .controller('DesktopGridDirectiveController', DesktopGridDirectiveController)
+        .controller('ApplicationsMenuController', ApplicationsMenuController)
 
         .directive('desktop', DesktopDirective.Factory())
         .directive('desktopGrid', DesktopGridDirective.Factory())
         .directive('desktopPanel', DesktopPanelDirective.Factory())
+        .directive('applicationsMenu', ApplicationsMenuDirective.Factory())
         .run(run)
     ;
 
@@ -39,5 +41,5 @@ module Kernel {
     }
 
     run.$inject = ['$globalScope'];
-    function run($globalScope) {}
+    function run($globalScope) {} // Hack to instantiate $globalScope service
 }

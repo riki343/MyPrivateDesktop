@@ -26,7 +26,8 @@
         "knplabs/knp-paginator-bundle": "^2.5",
         "friendsofsymfony/jsrouting-bundle": "^1.5",
         "codeception/codeception": "*",
-        "debach/zend-mp3": "dev-master"
+        "debach/zend-mp3": "dev-master",
+        "debril/rss-atom-bundle": "^2.3"
     },
     "require-dev": {
         "sensio/generator-bundle": "~2.3"

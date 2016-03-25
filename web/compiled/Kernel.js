@@ -1,6 +1,56 @@
 /// <reference path='interfaces.d.ts' />
 var Kernel;
 (function (Kernel) {
+    var UniqueList = (function () {
+        function UniqueList(items) {
+            if (angular.isDefined(items)) {
+                this.array = items;
+            }
+            else {
+                this.array = [];
+            }
+        }
+        UniqueList.prototype.add = function (item) {
+            if (this.array.indexOf(item) === -1) {
+                this.array.push(item);
+                return this.array.indexOf(item);
+            }
+            return null;
+        };
+        UniqueList.prototype.remove = function (item) {
+            if (this.array.indexOf(item) !== -1) {
+                this.array.splice(this.array.indexOf(item), 1);
+                return true;
+            }
+            return false;
+        };
+        UniqueList.prototype.removeAt = function (position) {
+            if (angular.isDefined(this[position])) {
+                this.array.splice(position, 1);
+                return true;
+            }
+            return false;
+        };
+        UniqueList.prototype.replace = function (newItem, oldItem) {
+            var index = this.array.indexOf(oldItem);
+            if (index !== -1) {
+                this[index] = newItem;
+                return index;
+            }
+            return null;
+        };
+        UniqueList.prototype.get = function (position) {
+            if (angular.isDefined(this.array[position]) === true) {
+                return this.array[position];
+            }
+            return null;
+        };
+        return UniqueList;
+    })();
+    Kernel.UniqueList = UniqueList;
+})(Kernel || (Kernel = {}));
+var Kernel;
+(function (Kernel) {
     var Distance = (function () {
         function Distance(width, height) {
             this._width = width;
@@ -1792,10 +1842,7 @@ var Kernel;
 var Kernel;
 (function (Kernel) {
     var DesktopPanelDirective = (function () {
-        function DesktopPanelDirective(window, document) {
-            var _this = this;
-            this.window = window;
-            this.document = document;
+        function DesktopPanelDirective() {
             this.templateUrl = '/views/desktop.panel.html';
             this.scope = true;
             this.bindToController = { 'settings': '=settings' };
@@ -1803,7 +1850,6 @@ var Kernel;
             this.controller = 'DesktopPanelDirectiveController';
             this.controllerAs = 'panel';
             this.link = function ($scope, $element) {
-                var window = _this.window;
                 if (!$scope.settings) {
                     $scope.settings = {
                         'height': '30px',
@@ -1814,37 +1860,23 @@ var Kernel;
                         'left': '0'
                     };
                 }
-                $scope.menuPanel = $element.find('div.desktop-panel-menu');
-                var panelBottom = parseInt($scope.settings.height.replace('px', '')) + 3;
-                $scope.menuPanel.css('bottom', panelBottom + 'px');
-                $scope.menuVisible = false;
-                var resizePanelMenu = function () {
-                    $scope.menuPanel.css('height', (window.innerHeight / 2) + 'px');
-                    $scope.menuPanel.css('width', (window.innerWidth * 0.35) + 'px');
-                };
-                var $window = angular.element(_this.window);
-                $window.on('resize', resizePanelMenu);
-                resizePanelMenu();
             };
         }
         DesktopPanelDirective.Factory = function () {
-            var directive = function ($window, $document) {
-                return new DesktopPanelDirective($window, $document);
-            };
+            var directive = function () { return new DesktopPanelDirective(); };
             return directive;
         };
-        DesktopPanelDirective.$inject = ['$window', '$document'];
+        DesktopPanelDirective.$inject = [];
         return DesktopPanelDirective;
     })();
     Kernel.DesktopPanelDirective = DesktopPanelDirective;
     var DesktopPanelDirectiveController = (function (_super) {
         __extends(DesktopPanelDirectiveController, _super);
-        function DesktopPanelDirectiveController(rootScope, windowManager, scope, timeout) {
+        function DesktopPanelDirectiveController(rootScope, windowManager, timeout) {
             var _this = this;
             _super.call(this);
             this.rootScope = rootScope;
             this.windowManager = windowManager;
-            this.scope = scope;
             this.timeout = timeout;
             this.onWindowCreated = function (event, data) {
                 _this.timeout(function () { _this.addWindow(_this.windowManager.getWindow(data.pid)); });
@@ -1858,7 +1890,7 @@ var Kernel;
         DesktopPanelDirectiveController.prototype.toggleWindow = function (app) {
             app.collapse();
         };
-        DesktopPanelDirectiveController.$inject = ['$rootScope', 'windowManagerService', '$scope', '$timeout'];
+        DesktopPanelDirectiveController.$inject = ['$rootScope', 'windowManagerService', '$timeout'];
         return DesktopPanelDirectiveController;
     })(Kernel.WindowContainer);
     Kernel.DesktopPanelDirectiveController = DesktopPanelDirectiveController;

@@ -10,6 +10,13 @@ module Kernel {
         file: string;
     }
 
+    export interface IModuleFileSettings {
+        top: number;
+        left: number;
+        width: number;
+        height: number;
+    }
+
     export interface IApplicationPackage {
         folder: string;
         module: IModuleMainFile;
@@ -19,12 +26,7 @@ module Kernel {
         javascript: Array<IModuleFile>;
         stylesheet: Array<IModuleFile>;
         resources: Array<any>;
-        settings: {
-            top: number;
-            left: number;
-            width: number;
-            height: number;
-        };
+        settings: IModuleFileSettings;
         info: Object;
     }
 }

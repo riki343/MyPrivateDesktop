@@ -4,7 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "b2896e096613cb896512d73713c102e3",
+    "hash": "0f649a973d1fbbd1ab6ee84d037eb801",
+    "content-hash": "3e49ccb1c16570ebe7087c8af266f14d",
     "packages": [
         {
             "name": "behat/transliterator",
@@ -207,6 +208,62 @@
             "description": "The best PHP library for Object-Oriented media file information reading and writing.",
             "homepage": "https://code.google.com/p/php-reader/",
             "time": "2016-01-04 13:23:44"
+        },
+        {
+            "name": "debril/rss-atom-bundle",
+            "version": "v2.3.3",
+            "target-dir": "Debril/RssAtomBundle",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/alexdebril/rss-atom-bundle.git",
+                "reference": "17b814928f0ab51fc9f9107f0bb840832a64ced0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/alexdebril/rss-atom-bundle/zipball/17b814928f0ab51fc9f9107f0bb840832a64ced0",
+                "reference": "17b814928f0ab51fc9f9107f0bb840832a64ced0",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3",
+                "symfony/config": "~2.6|~3.0"
+            },
+            "require-dev": {
+                "doctrine/common": "~2.3",
+                "doctrine/doctrine-bundle": "~1.2",
+                "phpunit/phpunit": "~4.7",
+                "symfony/browser-kit": "~2.6|~3.0",
+                "symfony/finder": "~2.6|~3.0",
+                "symfony/form": "~2.6|~3.0",
+                "symfony/framework-bundle": "~2.6|~3.0",
+                "symfony/validator": "~2.6|~3.0"
+            },
+            "suggest": {
+                "debril/feedio-bundle": "rss-atom-bundle will be replaced with feedio-bundle",
+                "guzzlehttp/guzzle": "We can use Guzzle >= 6.0 to fetch feed - set 'driver' to 'guzzle' then"
+            },
+            "type": "symfony-bundle",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Debril\\RssAtomBundle": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "LGPL-3.0"
+            ],
+            "description": "RSS and Atom support for Symfony",
+            "homepage": "http://debril.org/category/rss-atom-bundle/",
+            "keywords": [
+                "atom",
+                "rss"
+            ],
+            "time": "2016-03-11 08:56:34"
         },
         {
             "name": "doctrine/annotations",
@@ -1211,7 +1268,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/FriendsOfSymfony/FOSUserBundle/zipball/e770bfa2fd0fc665f55cd7cfeb34bddeffb892f4",
+                "url": "https://api.github.com/repos/FriendsOfSymfony/FOSUserBundle/zipball/16b04c49af05dd3fb381e4abe04f0e5e231ac76d",
                 "reference": "e770bfa2fd0fc665f55cd7cfeb34bddeffb892f4",
                 "shasum": ""
             },
