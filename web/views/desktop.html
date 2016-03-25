@@ -1,22 +1,25 @@
 <div ng-style="background.settings" class="desktop no-select">
 
-    <form ng-submit="desktop.launch(package);" class="form-horizontal" style="width: 100%;">
-        <div class="input-group input-group-sm">
-            <label class="input-group-addon" for="app-launcher">Package: </label>
-            <select id="app-launcher" class="form-control" ng-model="package">
-                <option value="/applications/system/DebugWindow/debug-window.ae">/applications/system/DebugWindow/debug-window.ae</option>
-                <option value="/applications/system/DesktopSettings/desktop-settings.ae">/applications/system/DesktopSettings/desktop-settings.ae</option>
-                <option value="/applications/system/ProcessManager/process-manager.ae">/applications/system/ProcessManager/process-manager.ae</option>
-                <option value="/applications/system/FileManager/file-manager.ae">/applications/system/FileManager/file-manager.ae</option>
-                <option value="/applications/system/AudioPlayer/audio-player.ae">/applications/system/AudioPlayer/audio-player.ae</option>
-            </select>
-            <span class="input-group-btn"><button class="btn btn-default btn-sm" type="submit">
-                <i class="fa fa-laptop"></i>Launch!</button>
-            </span>
-        </div>
-    </form>
+    <section id="main">
+        <form ng-submit="desktop.launch(package);" class="form-horizontal recent-apps-launcher-menu" style="width: 100%;">
+            <div class="input-group input-group-sm">
+                <label class="input-group-addon" for="app-launcher" style="border-radius: 0;">Package: </label>
+                <select id="app-launcher" class="form-control" ng-model="package">
+                    <option value="/applications/system/DebugWindow/debug-window.ae">/applications/system/DebugWindow/debug-window.ae</option>
+                    <option value="/applications/system/DesktopSettings/desktop-settings.ae">/applications/system/DesktopSettings/desktop-settings.ae</option>
+                    <option value="/applications/system/ProcessManager/process-manager.ae">/applications/system/ProcessManager/process-manager.ae</option>
+                    <option value="/applications/system/FileManager/file-manager.ae">/applications/system/FileManager/file-manager.ae</option>
+                    <option value="/applications/system/AudioPlayer/audio-player.ae">/applications/system/AudioPlayer/audio-player.ae</option>
+                </select>
+                <span class="input-group-btn">
+                    <button class="btn btn-default btn-sm" style="border-radius: 0;" type="submit">
+                    <i class="fa fa-laptop"></i>Launch!</button>
+                </span>
+            </div>
+        </form>
 
-    <desktop-grid grid="desktop.desktop.grid"></desktop-grid>
+        <desktop-categories on-category-changed="desktop.onSelectChange(category);"></desktop-categories>
 
-    <desktop-panel apps="applications"></desktop-panel>
+        <desktop-items on-ready="desktop.onItemsPanelReady($API);"></desktop-items>
+    </section>
 </div>

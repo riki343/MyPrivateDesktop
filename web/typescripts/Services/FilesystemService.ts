@@ -35,6 +35,7 @@ module Kernel {
                     'headers': {'Content-Type': undefined}
                 }
             );
+
             return promise;
         }
 

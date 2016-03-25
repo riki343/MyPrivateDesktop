@@ -1,0 +1,7 @@
+.file-icon[data-type="ae"] {
+    background-color: rgba(158, 0, 5, 0.9);
+}
+
+.file-icon[data-type="dir"] {
+    background-color: rgba(158, 89, 0, 0.9);
+}

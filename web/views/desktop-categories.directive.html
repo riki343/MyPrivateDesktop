@@ -1,0 +1,9 @@
+<aside class="sort-panel">
+    <ul class="list-vertical">
+        <li ng-repeat="cat in directive.categories" class="list-vertical-item" ng-class="{'active': directive.selected === cat}">
+            <a href="javascript:void(0);" ng-click="selectItem(cat);">
+                {{ ::cat }}
+            </a>
+        </li>
+    </ul>
+</aside>

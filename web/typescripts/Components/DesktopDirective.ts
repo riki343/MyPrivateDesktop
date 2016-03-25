@@ -25,6 +25,8 @@ module Kernel {
 
     export class DesktopDirectiveController {
         private desktop;
+        private sortPanelEvents: Object;
+        private itemsPanelAPI: iDesktopItemsDirectiveAPI;
         public static $inject = [
             '$scope', '$window', '$document', 'filesystemService',
             '$rootScope', '$http', 'desktopService',
@@ -94,5 +96,12 @@ module Kernel {
             });
         };
 
+        public onSelectChange = (category) => {
+            this.itemsPanelAPI.changeCategory(category);
+        };
+
+        public onItemsPanelReady = (API: iDesktopItemsDirectiveAPI) => {
+            this.itemsPanelAPI = API;
+        };
     }
 }

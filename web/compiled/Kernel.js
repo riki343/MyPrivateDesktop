@@ -1814,6 +1814,12 @@ var Kernel;
                     _this.scope.background.settings.height = _this.window.innerHeight;
                 });
             };
+            this.onSelectChange = function (category) {
+                _this.itemsPanelAPI.changeCategory(category);
+            };
+            this.onItemsPanelReady = function (API) {
+                _this.itemsPanelAPI = API;
+            };
             var promise = this.desktopService.getDesktop(this.scope.desktop.desktopId);
             promise.then(function (response) {
                 if (response !== null) {
@@ -1971,6 +1977,94 @@ var Kernel;
 })(Kernel || (Kernel = {}));
 var Kernel;
 (function (Kernel) {
+    var DesktopCategoriesDirective = (function () {
+        function DesktopCategoriesDirective() {
+            this.templateUrl = '/views/desktop-categories.directive.html';
+            this.restrict = 'E';
+            this.scope = {
+                'onCategoryChanged': '&'
+            };
+            this.link = function ($scope, $element) {
+                $scope.directive = {
+                    categories: ['Filesystem', 'Images', 'Music', 'Videos', 'Documents', 'Applications'],
+                    selected: 'Filesystem'
+                };
+                $scope.selectItem = function (item) {
+                    $scope.onCategoryChanged({ 'category': item });
+                    $scope.directive.selected = item;
+                };
+            };
+        }
+        DesktopCategoriesDirective.Factory = function () {
+            var factory = function () { return new DesktopCategoriesDirective(); };
+            return factory;
+        };
+        DesktopCategoriesDirective.$inject = [];
+        return DesktopCategoriesDirective;
+    })();
+    Kernel.DesktopCategoriesDirective = DesktopCategoriesDirective;
+})(Kernel || (Kernel = {}));
+var Kernel;
+(function (Kernel) {
+    var DesktopItemsDirective = (function () {
+        function DesktopItemsDirective(fs) {
+            var _this = this;
+            this.fs = fs;
+            this.templateUrl = '/views/desktop-items.directive.html';
+            this.restrict = 'E';
+            this.scope = {
+                'onReady': '&',
+                'onLaunch': '&'
+            };
+            this.link = function ($scope, $element) {
+                _this.vm = $scope;
+                $scope.API = {
+                    changeCategory: _this.changeCategory
+                };
+                $scope.onReady({ '$API': $scope.API });
+                _this.changeCategory('Filesystem');
+            };
+            this.changeCategory = function (category) {
+                if (category === 'Filesystem') {
+                    _this.loadRootDir();
+                }
+                else {
+                    _this.loadSection(category);
+                }
+            };
+            this.loadRootDir = function () {
+                var promise = _this.fs.getRootDir();
+                promise.success(_this.handleSuccessPromise);
+            };
+            this.loadSection = function (section) {
+                var sectionDir = null;
+                var folders = _this.vm.directory.subdirs;
+                for (var i = 0; i < folders.length; i++) {
+                    if (folders[i].name === section) {
+                        sectionDir = folders[i];
+                        break;
+                    }
+                }
+                var promise = _this.fs.getDir(sectionDir.id);
+                promise.success(_this.handleSuccessPromise);
+            };
+            this.handleSuccessPromise = function (response) {
+                _this.vm.directory = response;
+            };
+        }
+        DesktopItemsDirective.Factory = function () {
+            var factory = function (filesystemService) {
+                return new DesktopItemsDirective(filesystemService);
+            };
+            return factory;
+        };
+        DesktopItemsDirective.$inject = ['filesystemService'];
+        return DesktopItemsDirective;
+    })();
+    Kernel.DesktopItemsDirective = DesktopItemsDirective;
+})(Kernel || (Kernel = {}));
+var Kernel;
+(function (Kernel) {
     angular.module('kernel', [
         'ngAnimate',
         'ngSanitize',
@@ -1991,11 +2085,9 @@ var Kernel;
         .factory('spinnerService', Kernel.SpinnerService.Factory())
         .controller('applicationController', Kernel.ApplicationController)
         .controller('DesktopDirectiveController', Kernel.DesktopDirectiveController)
-        .controller('DesktopPanelDirectiveController', Kernel.DesktopPanelDirectiveController)
-        .controller('DesktopGridDirectiveController', Kernel.DesktopGridDirectiveController)
         .directive('desktop', Kernel.DesktopDirective.Factory())
-        .directive('desktopGrid', Kernel.DesktopGridDirective.Factory())
-        .directive('desktopPanel', Kernel.DesktopPanelDirective.Factory())
+        .directive('desktopCategories', Kernel.DesktopCategoriesDirective.Factory())
+        .directive('desktopItems', Kernel.DesktopItemsDirective.Factory())
         .run(run);
     globalScope.$inject = ['$window', '$rootScope'];
     function globalScope($window, $rootScope) {

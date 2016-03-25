@@ -12,3 +12,4 @@
 /web/bundles/
 tests/_output/*
 /web/compiled
+/web/bower_components

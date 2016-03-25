@@ -26,6 +26,8 @@
     "videogular-poster": "^1.4.1",
     "angular-file-upload": "^2.2.0",
     "snabbt.js": "^0.6.4",
-    "angular-loading-bar": "^0.8.0"
+    "angular-loading-bar": "^0.8.0",
+    "ng-dialog": "ngDialog#^0.5.9",
+    "fileicon.css": "^0.1.0"
   }
 }
