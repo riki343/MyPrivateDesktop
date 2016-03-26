@@ -2,6 +2,7 @@ module Kernel {
     export interface iDesktopItemsDirectiveAPI {
         changeCategory(category: string);
         loadDirectory(dir_id: number);
+        launch(file: iFile);
     }
 
     export interface iDesktopItems extends ng.IScope {
@@ -33,7 +34,8 @@ module Kernel {
 
             $scope.API = {
                 changeCategory: this.changeCategory,
-                loadDirectory: this.loadDir
+                loadDirectory: this.loadDir,
+                launch: this.launch
             };
 
             $scope.onReady({'$API': $scope.API});

@@ -116,7 +116,7 @@ module Kernel {
         };
 
         public onItemsPanelLaunch = (params: any) => {
-            let extension = params.file.split('.');
+            let extension = params.file.name.split('.');
             extension = extension[extension.length - 1];
             if (extension === 'ae') {
                 this.launch(params.file.webPath);

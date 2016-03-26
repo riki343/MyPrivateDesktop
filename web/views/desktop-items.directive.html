@@ -15,7 +15,7 @@
         </li>
 
         <li class="list-horizontal-item" ng-repeat="file in directory.files">
-            <a href="javascript:void(0);">
+            <a href="javascript:void(0);" ng-click="API.launch(file);">
                 <div class="file-icon file-icon-adaptive list-horizontal-item-icon" data-type="{{ file.extension }}"></div>
                 <p>{{ file.name }}</p>
             </a>

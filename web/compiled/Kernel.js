@@ -1870,7 +1870,7 @@ var Kernel;
                 return _this.fer.getAppForExtension(extension);
             };
             this.onItemsPanelLaunch = function (params) {
-                var extension = params.file.split('.');
+                var extension = params.file.name.split('.');
                 extension = extension[extension.length - 1];
                 if (extension === 'ae') {
                     _this.launch(params.file.webPath);
@@ -2082,7 +2082,8 @@ var Kernel;
                 _this.vm = $scope;
                 $scope.API = {
                     changeCategory: _this.changeCategory,
-                    loadDirectory: _this.loadDir
+                    loadDirectory: _this.loadDir,
+                    launch: _this.launch
                 };
                 $scope.onReady({ '$API': $scope.API });
                 _this.changeCategory('Filesystem');
