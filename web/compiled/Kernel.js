@@ -1357,6 +1357,39 @@ var Kernel;
     })();
     Kernel.FilesystemService = FilesystemService;
 })(Kernel || (Kernel = {}));
+var Kernel;
+(function (Kernel) {
+    var FileExtensionRecognizerService = (function () {
+        function FileExtensionRecognizerService(http) {
+            var _this = this;
+            this.http = http;
+            this.getExtensionsForDesktop = function (desktop_id) {
+                var promise = _this.http.get('/api/extensions-applications/list/' + desktop_id);
+                promise.success(function (response) {
+                    _this.extensions = response;
+                });
+            };
+            this.getAppForExtension = function (ext) {
+                if (angular.isDefined(_this.extensions[ext]) === true) {
+                    return _this.extensions[ext].application;
+                }
+                else {
+                    return null;
+                }
+            };
+            this.extensions = {};
+        }
+        FileExtensionRecognizerService.Factory = function () {
+            var factory = function ($http) {
+                return new FileExtensionRecognizerService($http);
+            };
+            return factory;
+        };
+        FileExtensionRecognizerService.$inject = ['$http'];
+        return FileExtensionRecognizerService;
+    })();
+    Kernel.FileExtensionRecognizerService = FileExtensionRecognizerService;
+})(Kernel || (Kernel = {}));
 /// <reference path='services.d.ts' />
 var Kernel;
 (function (Kernel) {
@@ -1433,13 +1466,15 @@ var Kernel;
             this.rootScope = rootScope;
             this.resourceLoader = resourceLoader;
             this.windowManager = windowManager;
-            this.launchApplication = function (pack) {
+            this.launchApplication = function (pack, params) {
                 // Get app package
                 var promise = _this.http.get(pack);
                 // Handle response
-                promise.success(_this.bootstrap);
+                promise.success(function (response) {
+                    _this.bootstrap(response, params);
+                });
             };
-            this.bootstrap = function (response) {
+            this.bootstrap = function (response, params) {
                 var windowBox = new Kernel.WindowBox(response.settings.top, response.settings.left, response.settings.width, response.settings.height);
                 // Create application settings
                 var appSettings = new Kernel.ApplicationWindowSettings(windowBox);
@@ -1457,8 +1492,12 @@ var Kernel;
                     compiledTemplate.attr('id', 'application-' + application.pid);
                     // Bootstrap new angular module
                     var app = angular.bootstrap(compiledTemplate, [response.module.name]);
+                    var appScope = app.get('$rootScope');
                     // Define application standard events
-                    _this.defineWindowEvents(app.get('$rootScope'), application);
+                    _this.defineWindowEvents(appScope, application);
+                    if (angular.isDefined(params) === true) {
+                        appScope.params = params;
+                    }
                     // Register window in window manager
                     var listItem = new Kernel.WindowListItem(application.pid, compiledTemplate, application, response);
                     _this.windowManager.addWindow(listItem);
@@ -1775,7 +1814,7 @@ var Kernel;
     })();
     Kernel.DesktopDirective = DesktopDirective;
     var DesktopDirectiveController = (function () {
-        function DesktopDirectiveController(scope, window, document, fs, rootScope, http, desktopService, applicationLauncher, timeout) {
+        function DesktopDirectiveController(scope, window, document, fs, rootScope, http, desktopService, applicationLauncher, timeout, fer) {
             var _this = this;
             this.scope = scope;
             this.window = window;
@@ -1786,6 +1825,7 @@ var Kernel;
             this.desktopService = desktopService;
             this.applicationLauncher = applicationLauncher;
             this.timeout = timeout;
+            this.fer = fer;
             this.launch = function (pack) {
                 _this.applicationLauncher.launchApplication(pack);
             };
@@ -1830,6 +1870,7 @@ var Kernel;
                     scope.package = '/applications/system/ProcessManager/process-manager.ae';
                 }
             });
+            this.fer.getExtensionsForDesktop(this.scope.desktop.desktopId);
             // Register events
             this.rootScope.$on('DesktopImageChanged', this.DesktopImageChanged);
             this.scope.$on('DesktopGridStateChanged', this.DesktopGridStateChanged);
@@ -1843,7 +1884,7 @@ var Kernel;
         DesktopDirectiveController.$inject = [
             '$scope', '$window', '$document', 'filesystemService',
             '$rootScope', '$http', 'desktopService',
-            'applicationLauncherService', '$timeout'
+            'applicationLauncherService', '$timeout', 'FERService'
         ];
         return DesktopDirectiveController;
     })();
@@ -2019,7 +2060,8 @@ var Kernel;
             this.link = function ($scope, $element) {
                 _this.vm = $scope;
                 $scope.API = {
-                    changeCategory: _this.changeCategory
+                    changeCategory: _this.changeCategory,
+                    loadDirectory: _this.loadDir
                 };
                 $scope.onReady({ '$API': $scope.API });
                 _this.changeCategory('Filesystem');
@@ -2034,11 +2076,14 @@ var Kernel;
             };
             this.loadRootDir = function () {
                 var promise = _this.fs.getRootDir();
-                promise.success(_this.handleSuccessPromise);
+                promise.success(function (response) {
+                    _this.vm.directory = response;
+                    _this.vm.rootDirectory = response;
+                });
             };
             this.loadSection = function (section) {
                 var sectionDir = null;
-                var folders = _this.vm.directory.subdirs;
+                var folders = _this.vm.rootDirectory.subdirs;
                 for (var i = 0; i < folders.length; i++) {
                     if (folders[i].name === section) {
                         sectionDir = folders[i];
@@ -2047,6 +2092,12 @@ var Kernel;
                 }
                 var promise = _this.fs.getDir(sectionDir.id);
                 promise.success(_this.handleSuccessPromise);
+            };
+            this.loadDir = function (dir_id) {
+                var promise = _this.fs.getDir(dir_id);
+                promise.success(function (response) {
+                    _this.vm.directory = response;
+                });
             };
             this.handleSuccessPromise = function (response) {
                 _this.vm.directory = response;
@@ -2083,6 +2134,7 @@ var Kernel;
         .factory('applicationLauncherService', Kernel.ApplicationLauncher.Factory())
         .factory('desktopService', Kernel.DesktopService.Factory())
         .factory('spinnerService', Kernel.SpinnerService.Factory())
+        .factory('FERService', Kernel.FileExtensionRecognizerService.Factory())
         .controller('applicationController', Kernel.ApplicationController)
         .controller('DesktopDirectiveController', Kernel.DesktopDirectiveController)
         .directive('desktop', Kernel.DesktopDirective.Factory())

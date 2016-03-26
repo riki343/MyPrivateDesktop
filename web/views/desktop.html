@@ -5,11 +5,10 @@
             <div class="input-group input-group-sm">
                 <label class="input-group-addon" for="app-launcher" style="border-radius: 0;">Package: </label>
                 <select id="app-launcher" class="form-control" ng-model="package">
-                    <option value="/applications/system/DebugWindow/debug-window.ae">/applications/system/DebugWindow/debug-window.ae</option>
-                    <option value="/applications/system/DesktopSettings/desktop-settings.ae">/applications/system/DesktopSettings/desktop-settings.ae</option>
-                    <option value="/applications/system/ProcessManager/process-manager.ae">/applications/system/ProcessManager/process-manager.ae</option>
-                    <option value="/applications/system/FileManager/file-manager.ae">/applications/system/FileManager/file-manager.ae</option>
-                    <option value="/applications/system/AudioPlayer/audio-player.ae">/applications/system/AudioPlayer/audio-player.ae</option>
+                    <option value="/applications/system/DesktopSettings/desktop-settings.ae">desktop-settings.ae</option>
+                    <option value="/applications/system/ProcessManager/process-manager.ae">process-manager.ae</option>
+                    <option value="/applications/system/FileManager/file-manager.ae">file-manager.ae</option>
+                    <option value="/applications/system/AudioPlayer/audio-player.ae">audio-player.ae</option>
                 </select>
                 <span class="input-group-btn">
                     <button class="btn btn-default btn-sm" style="border-radius: 0;" type="submit">
@@ -20,6 +19,8 @@
 
         <desktop-categories on-category-changed="desktop.onSelectChange(category);"></desktop-categories>
 
-        <desktop-items on-ready="desktop.onItemsPanelReady($API);"></desktop-items>
+        <desktop-items on-ready="desktop.onItemsPanelReady($API);"
+                       on-launch="desktop.onItemsPanelLaunch(event);">
+        </desktop-items>
     </section>
 </div>

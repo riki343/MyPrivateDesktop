@@ -1,3 +1,19 @@
+.file-icon-adaptive {
+    width: 80px;
+    height: 109px;
+    border-radius: 3px;
+}
+
+.file-icon-adaptive::before {
+    border-bottom-left-radius: 4px;
+    border-width: 16px;
+}
+.file-icon-adaptive::after {
+    text-align: left;
+    font-size: 24px;
+    padding: 4px 10px;
+}
+
 .file-icon[data-type="ae"] {
     background-color: rgba(158, 0, 5, 0.9);
 }

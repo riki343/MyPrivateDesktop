@@ -2,6 +2,7 @@
 /// <reference path='ProcessManagerService.ts' />
 /// <reference path='SpinnerService.ts' />
 /// <reference path='FilesystemService.ts' />
+/// <reference path='FileExtensionRecognizerService.ts' />
 /// <reference path='DesktopService.ts' />
 /// <reference path='ApplicationLauncher.ts' />
 /// <reference path='ResourceLoader.ts' />

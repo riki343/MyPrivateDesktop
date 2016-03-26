@@ -30,7 +30,7 @@ module Kernel {
         public static $inject = [
             '$scope', '$window', '$document', 'filesystemService',
             '$rootScope', '$http', 'desktopService',
-            'applicationLauncherService', '$timeout'
+            'applicationLauncherService', '$timeout', 'FERService'
         ];
 
         constructor(
@@ -42,7 +42,8 @@ module Kernel {
             private http: ng.IHttpService,
             private desktopService: DesktopService,
             private applicationLauncher: ApplicationLauncher,
-            private timeout: ng.ITimeoutService
+            private timeout: ng.ITimeoutService,
+            private fer: FileExtensionRecognizerService
         ) {
             let promise = this.desktopService.getDesktop(this.scope.desktop.desktopId);
             promise.then((response) => {
@@ -54,6 +55,8 @@ module Kernel {
                     scope.package  = '/applications/system/ProcessManager/process-manager.ae';
                 }
             });
+
+            this.fer.getExtensionsForDesktop(this.scope.desktop.desktopId);
 
             // Register events
             this.rootScope.$on('DesktopImageChanged', this.DesktopImageChanged);

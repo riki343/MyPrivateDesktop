@@ -20,14 +20,16 @@ module Kernel {
             this.applicationLayer = this.document.find('div#applications-layer');
         }
 
-        public launchApplication = (pack: string): void => {
+        public launchApplication = (pack: string, params?: any): void => {
             // Get app package
             let promise = this.http.get(pack);
             // Handle response
-            promise.success(this.bootstrap);
+            promise.success((response: IApplicationPackage) => {
+                this.bootstrap(response, params);
+            });
         };
 
-        public bootstrap = (response: IApplicationPackage) => {
+        public bootstrap = (response: IApplicationPackage, params?: any) => {
             let windowBox = new WindowBox(
                 response.settings.top, response.settings.left,
                 response.settings.width, response.settings.height
@@ -54,8 +56,12 @@ module Kernel {
                 // Bootstrap new angular module
                 let app = angular.bootstrap(compiledTemplate, [response.module.name]);
 
+                let appScope: any = app.get('$rootScope');
                 // Define application standard events
-                this.defineWindowEvents(app.get('$rootScope'), application);
+                this.defineWindowEvents(appScope, application);
+                if (angular.isDefined(params) === true) {
+                    appScope.params = params;
+                }
 
                 // Register window in window manager
                 let listItem = new WindowListItem(

@@ -17,6 +17,7 @@ module Kernel {
         .factory('applicationLauncherService', ApplicationLauncher.Factory())
         .factory('desktopService', DesktopService.Factory())
         .factory('spinnerService', SpinnerService.Factory())
+        .factory('FERService', FileExtensionRecognizerService.Factory())
 
         .controller('applicationController', ApplicationController)
         .controller('DesktopDirectiveController', DesktopDirectiveController)

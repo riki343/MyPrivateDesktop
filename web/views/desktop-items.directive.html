@@ -1,16 +1,23 @@
 <div class="main-panel">
     <ul class="list-horizontal">
+        <li class="list-horizontal-item" ng-if="directory.parentID !== null">
+            <a href="javascript:void(0);" ng-click="API.loadDirectory(directory.parentID);">
+                <div class="file-icon file-icon-adaptive list-horizontal-item-icon" data-type="dir"></div>
+                <p>...</p>
+            </a>
+        </li>
+
         <li class="list-horizontal-item" ng-repeat="dir in directory.subdirs">
-            <a href="javascript:void(0);">
-                <div class="file-icon file-icon-xl list-horizontal-item-icon" data-type="dir"></div>
+            <a href="javascript:void(0);" ng-click="API.loadDirectory(dir.id);">
+                <div class="file-icon file-icon-adaptive list-horizontal-item-icon" data-type="dir"></div>
                 <p>{{ dir.name }}</p>
             </a>
         </li>
 
         <li class="list-horizontal-item" ng-repeat="file in directory.files">
             <a href="javascript:void(0);">
-                <div class="file-icon file-icon-xl list-horizontal-item-icon" data-type="{{ file.extension }}"></div>
-                <p>{{ dir.name }}</p>
+                <div class="file-icon file-icon-adaptive list-horizontal-item-icon" data-type="{{ file.extension }}"></div>
+                <p>{{ file.name }}</p>
             </a>
         </li>
     </ul>

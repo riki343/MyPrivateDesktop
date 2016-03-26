@@ -288,11 +288,12 @@ body {
 
 .list-horizontal-item {
     width: 19%;
-    padding: 10px;
+    padding: 0 10px;
     display: inline-flex;
-    height: 150px;
+    height: 170px;
     text-align: center;
-    box-sizing: border-box;
+    overflow: hidden;
+    font-size: 13px;
 }
 
 .list-horizontal-item > a {
@@ -316,6 +317,8 @@ body {
     width: 100%;
     height: 20px;
     line-height: 20px;
+    word-break: break-word;
+    white-space: pre-line;
 }
 
 .recent-apps-launcher-menu {
