@@ -70,6 +70,10 @@ module Kernel {
             this.applicationLauncher.launchApplication(pack);
         };
 
+        public launchAssociated = (pack: string, params: any) => {
+            this.applicationLauncher.launchApplication(pack, params);
+        };
+
         public createBackground (response) {
             return { 'settings': this.desktop.settings.getCss() };
         }
@@ -105,6 +109,21 @@ module Kernel {
 
         public onItemsPanelReady = (API: iDesktopItemsDirectiveAPI) => {
             this.itemsPanelAPI = API;
+        };
+
+        private dispatchExtension = (extension: string) => {
+            return this.fer.getAppForExtension(extension);
+        };
+
+        public onItemsPanelLaunch = (params: any) => {
+            let extension = params.file.split('.');
+            extension = extension[extension.length - 1];
+            if (extension === 'ae') {
+                this.launch(params.file.webPath);
+            } else {
+                let pack = this.dispatchExtension(extension);
+                this.launchAssociated(pack, params);
+            }
         };
     }
 }

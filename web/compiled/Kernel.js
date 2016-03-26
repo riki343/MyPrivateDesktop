@@ -1380,12 +1380,15 @@ var Kernel;
             this.extensions = {};
         }
         FileExtensionRecognizerService.Factory = function () {
-            var factory = function ($http) {
-                return new FileExtensionRecognizerService($http);
+            var factory = function ($http, $window) {
+                if (angular.isDefined($window.FERService) === false) {
+                    $window.FERService = new FileExtensionRecognizerService($http);
+                }
+                return $window.FERService;
             };
             return factory;
         };
-        FileExtensionRecognizerService.$inject = ['$http'];
+        FileExtensionRecognizerService.$inject = ['$http', '$window'];
         return FileExtensionRecognizerService;
     })();
     Kernel.FileExtensionRecognizerService = FileExtensionRecognizerService;
@@ -1829,6 +1832,9 @@ var Kernel;
             this.launch = function (pack) {
                 _this.applicationLauncher.launchApplication(pack);
             };
+            this.launchAssociated = function (pack, params) {
+                _this.applicationLauncher.launchApplication(pack, params);
+            };
             // EVENTS
             this.DesktopImageChanged = function (event, data) {
                 _this.scope.background.settings['background-image'] = 'url(\'' + data + '\')';
@@ -1859,6 +1865,20 @@ var Kernel;
             };
             this.onItemsPanelReady = function (API) {
                 _this.itemsPanelAPI = API;
+            };
+            this.dispatchExtension = function (extension) {
+                return _this.fer.getAppForExtension(extension);
+            };
+            this.onItemsPanelLaunch = function (params) {
+                var extension = params.file.split('.');
+                extension = extension[extension.length - 1];
+                if (extension === 'ae') {
+                    _this.launch(params.file.webPath);
+                }
+                else {
+                    var pack = _this.dispatchExtension(extension);
+                    _this.launchAssociated(pack, params);
+                }
             };
             var promise = this.desktopService.getDesktop(this.scope.desktop.desktopId);
             promise.then(function (response) {
@@ -2048,9 +2068,10 @@ var Kernel;
 var Kernel;
 (function (Kernel) {
     var DesktopItemsDirective = (function () {
-        function DesktopItemsDirective(fs) {
+        function DesktopItemsDirective(fs, fer) {
             var _this = this;
             this.fs = fs;
+            this.fer = fer;
             this.templateUrl = '/views/desktop-items.directive.html';
             this.restrict = 'E';
             this.scope = {
@@ -2102,14 +2123,17 @@ var Kernel;
             this.handleSuccessPromise = function (response) {
                 _this.vm.directory = response;
             };
+            this.launch = function (file) {
+                _this.vm.onLaunch({ 'params': { 'file': file, 'directory': _this.vm.directory } });
+            };
         }
         DesktopItemsDirective.Factory = function () {
-            var factory = function (filesystemService) {
-                return new DesktopItemsDirective(filesystemService);
+            var factory = function (filesystemService, FERService) {
+                return new DesktopItemsDirective(filesystemService, FERService);
             };
             return factory;
         };
-        DesktopItemsDirective.$inject = ['filesystemService'];
+        DesktopItemsDirective.$inject = ['filesystemService', 'FERService'];
         return DesktopItemsDirective;
     })();
     Kernel.DesktopItemsDirective = DesktopItemsDirective;
@@ -2129,12 +2153,12 @@ var Kernel;
         .factory('$globalScope', globalScope)
         .factory('resourceLoaderService', Kernel.ResourceLoader.Factory())
         .factory('processManagerService', Kernel.ProcessManagerService.Factory())
+        .factory('FERService', Kernel.FileExtensionRecognizerService.Factory())
         .factory('windowManagerService', Kernel.WindowManager.Factory())
         .factory('filesystemService', Kernel.FilesystemService.Factory())
         .factory('applicationLauncherService', Kernel.ApplicationLauncher.Factory())
         .factory('desktopService', Kernel.DesktopService.Factory())
         .factory('spinnerService', Kernel.SpinnerService.Factory())
-        .factory('FERService', Kernel.FileExtensionRecognizerService.Factory())
         .controller('applicationController', Kernel.ApplicationController)
         .controller('DesktopDirectiveController', Kernel.DesktopDirectiveController)
         .directive('desktop', Kernel.DesktopDirective.Factory())

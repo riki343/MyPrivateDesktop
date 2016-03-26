@@ -12,12 +12,12 @@ module Kernel {
         .factory('$globalScope', globalScope)
         .factory('resourceLoaderService', ResourceLoader.Factory())
         .factory('processManagerService', ProcessManagerService.Factory())
+        .factory('FERService', FileExtensionRecognizerService.Factory())
         .factory('windowManagerService', WindowManager.Factory())
         .factory('filesystemService', FilesystemService.Factory())
         .factory('applicationLauncherService', ApplicationLauncher.Factory())
         .factory('desktopService', DesktopService.Factory())
         .factory('spinnerService', SpinnerService.Factory())
-        .factory('FERService', FileExtensionRecognizerService.Factory())
 
         .controller('applicationController', ApplicationController)
         .controller('DesktopDirectiveController', DesktopDirectiveController)

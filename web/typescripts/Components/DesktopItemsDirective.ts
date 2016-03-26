@@ -10,7 +10,7 @@ module Kernel {
         rootDirectory: iFolder;
 
         onReady(API: Object);
-        onLaunch(pack: string);
+        onLaunch(params: Object);
     }
 
     export class DesktopItemsDirective implements ng.IDirective {
@@ -78,6 +78,10 @@ module Kernel {
 
         private handleSuccessPromise = (response: iFolder) => {
             this.vm.directory = response;
+        };
+
+        public launch = (file) => {
+            this.vm.onLaunch({'params': {'file': file, 'directory': this.vm.directory}});
         };
 
         public static $inject:Array<string> = ['filesystemService', 'FERService'];

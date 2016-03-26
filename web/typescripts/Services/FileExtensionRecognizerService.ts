@@ -28,7 +28,7 @@ module Kernel {
             const factory = (
                 $http: ng.IHttpService, $window
             ) => {
-                if (angular.isDefined($window.FERService) === true) {
+                if (angular.isDefined($window.FERService) === false) {
                     $window.FERService = new FileExtensionRecognizerService($http);
                 }
 
