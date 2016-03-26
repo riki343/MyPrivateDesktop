@@ -1,7 +1,8 @@
 <div class="row" ng-repeat="row in gallery.rows">
     <div class="col-xs-4" ng-repeat="img in row">
-        <a href="javascript:void(0);" class="thumbnail" ng-click="gallery.setUpSelectedImg(img.id)">
-            <img ng-src="{{img.webPath}}" alt="{{img.name}}" style="width: 150px; height: 150px">
+        <a href="javascript:void(0);" class="thumbnail img-class">
+            <img class="img-responsive" ng-src="{{img.webPath}}" alt="{{img.name}}" ng-click="gallery.setUpSelectedImg(img.id)">
+            <i class="fa fa-times fa-lg close-button-class" ng-click="gallery.removeImg(img.id)"></i>
         </a>
     </div>
 </div>

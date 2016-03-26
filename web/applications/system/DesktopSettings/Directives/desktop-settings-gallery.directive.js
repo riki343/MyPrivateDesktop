@@ -6,7 +6,7 @@
     ;
 
     Directive.$inject = [ '$window'];
-    function Directive($window, fs) {
+    function Directive() {
         return {
             'restriction': 'E',
             'templateUrl': '/applications/system/DesktopSettings/Views/desktop-settings-gallery.directive.html',
@@ -52,8 +52,15 @@
             promise.success(this.browseHandler);
         }.bind(this);
 
-        this.setUpSelectedImg = function(id){
+        this.setUpSelectedImg = function(id) {
             var promise = ds.changeBckFromGallery(id);
+        }.bind(this);
+
+        this.removeImg = function(id) {
+            var promise = fs.rmFile(id);
+            promise.then(function(){
+                self.browse(self.directory.id)
+            });
         }.bind(this);
 
         var promise = fs.getRootDir();

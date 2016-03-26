@@ -1287,9 +1287,10 @@ var Kernel;
 var Kernel;
 (function (Kernel) {
     var FilesystemService = (function () {
-        function FilesystemService(http, q) {
+        function FilesystemService(http, q, rootScope) {
             this.http = http;
             this.q = q;
+            this.rootScope = rootScope;
         }
         FilesystemService.prototype.getDir = function (id) {
             return this.http.get('/api/filesystem/directory/' + id);
@@ -1303,6 +1304,7 @@ var Kernel;
             });
         };
         FilesystemService.prototype.uploadFiles = function (files) {
+            var _this = this;
             var formData = new FormData();
             for (var i = 0; i < files.length; i++) {
                 formData.append("file" + i, files[i]);
@@ -1310,6 +1312,9 @@ var Kernel;
             var promise = this.http.post('/api/filesystem/file/' + 1, formData, {
                 'transformRequest': angular.identity,
                 'headers': { 'Content-Type': undefined }
+            });
+            promise.success(function (response) {
+                _this.rootScope.$broadcast('FileUploaded', {});
             });
             return promise;
         };
@@ -1335,8 +1340,13 @@ var Kernel;
         FilesystemService.prototype.mvFile = function (file, newfile) {
             return this.createPromise(file);
         };
-        FilesystemService.prototype.rmFile = function (file) {
-            return this.createPromise(file);
+        FilesystemService.prototype.rmFile = function (file_id) {
+            var _this = this;
+            var promise = this.http.delete(Routing.generate("fs.file.delete", { 'file_id': file_id }));
+            promise.success(function (response) {
+                _this.rootScope.$broadcast('FileDeleted', {});
+            });
+            return this.handlePromise(promise);
         };
         FilesystemService.prototype.mkFile = function (file) {
             return this.createPromise(file);
@@ -1349,10 +1359,10 @@ var Kernel;
             return defer.promise;
         };
         FilesystemService.Factory = function () {
-            var service = function ($http, $q) { return new FilesystemService($http, $q); };
+            var service = function ($http, $q, $rootScope) { return new FilesystemService($http, $q, $rootScope); };
             return service;
         };
-        FilesystemService.$inject = ['$http', '$q'];
+        FilesystemService.$inject = ['$http', '$q', '$rootScope'];
         return FilesystemService;
     })();
     Kernel.FilesystemService = FilesystemService;

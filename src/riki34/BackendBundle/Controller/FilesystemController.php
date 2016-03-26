@@ -96,8 +96,28 @@ class FilesystemController extends Controller
         // TODO: implement function renameFile()
     }
 
-    public function deleteFile() {
-        // TODO: implement function deleteFile()
+    /**
+     * @Route("/file/{file_id}", name="fs.file.delete")
+     * @Method({"DELETE"})
+     * @param Request $request
+     * @param integer $file_id
+     * @return JsonResponse
+     */
+    public function deleteFile(Request $request, $file_id) {
+        /** @var EntityManager $em */
+        $em = $this->getDoctrine()->getManager();
+
+        /** UserFile $file */
+        $file = $em->getRepository("riki34BackendBundle:UserFile")->findOneBy(['id' => $file_id]);
+        if ($file === null) {
+            $message = $this->get('translator')->trans('file404', [], 'fileSystem');
+            return new JsonResponse(['error' => $message], 404);
+        }
+        $fs = new Filesystem();
+        $fs->remove($file->getWebPath());
+        $em->remove($file);
+        $em->flush();
+        return new JsonResponse(200);
     }
 
     /**

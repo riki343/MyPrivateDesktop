@@ -1,12 +1,14 @@
 /// <reference path="services.d.ts" />
 
 module Kernel {
+    import IRequestShortcutConfig = angular.IRequestShortcutConfig;
     export class FilesystemService {
-        static $inject = ['$http', '$q'];
+        static $inject = ['$http', '$q', '$rootScope'];
 
         constructor(
             private http:ng.IHttpService,
-            private q:ng.IQService
+            private q:ng.IQService,
+            private rootScope: ng.IRootScopeService
         ) {}
 
         public getDir(id: number) {
@@ -35,6 +37,10 @@ module Kernel {
                     'headers': {'Content-Type': undefined}
                 }
             );
+
+            promise.success((response: any) => {
+                this.rootScope.$broadcast('FileUploaded', {});
+            });
 
             return promise;
         }
@@ -68,8 +74,12 @@ module Kernel {
             return this.createPromise(file);
         }
 
-        public rmFile(file) {
-            return this.createPromise(file);
+        public rmFile(file_id: Number) {
+            let promise = this.http.delete(Routing.generate("fs.file.delete", {'file_id': file_id}));
+            promise.success((response: any) => {
+                this.rootScope.$broadcast('FileDeleted', {});
+            });
+            return this.handlePromise(promise);
         }
 
         public mkFile(file) {
@@ -86,7 +96,7 @@ module Kernel {
         }
 
         public static Factory() {
-            const service = ($http:ng.IHttpService, $q:ng.IQService) => new FilesystemService($http, $q);
+            const service = ($http:ng.IHttpService, $q:ng.IQService, $rootScope:ng.IRootScopeService) => new FilesystemService($http, $q, $rootScope);
 
             return service;
         }

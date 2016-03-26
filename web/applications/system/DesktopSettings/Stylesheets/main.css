@@ -1,61 +1,3 @@
-.file-manager-main {
-    height: 100%;
-}
-
-.file-manager-modal {
-    display: none;
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    z-index: 1110;
-}
-
-.file-manager-modal.visible {
-    display: block;
-}
-
-.file-manager-modal-container {
-    background-color: white;
-    z-index: 1111;
-    margin: 10% auto 0;
-    opacity: 1.0;
-    border: solid lightblue 2px;
-}
-
-.file-manager-modal-container.small {
-    width: 30%;
-}
-
-.file-manager-modal-container.medium {
-    width: 50%;
-}
-
-.file-manager-modal-container.big {
-    width: 70%;
-}
-
-.file-manager-modal-container.full {
-    width: 100%;
-}
-
-.file-manager-modal-header {
-    width: 100%;
-    padding: 5px 0;
-    text-align: center;
-}
-
-.file-manager-modal-content {
-    width: 100%;
-    padding: 15px;
-    text-align: left;
-}
-
-.file-manager-modal-footer {
-    width: 100%;
-    padding: 5px 15px;
-    text-align: right;
-}
-
 .btn-file {
     position: relative;
     overflow: hidden;
@@ -74,4 +16,24 @@
     background: white;
     cursor: inherit;
     display: block;
+}
+
+.close-button-class{
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 20px;
+    display: none;
+}
+
+.img-class{
+    position: relative;
+}
+
+.img-class:hover > .close-button-class {
+    display: block;
+}
+
+.fa-times{
+    color: red;
 }
